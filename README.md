@@ -30,9 +30,8 @@
 6. 클리어 시 엔딩
 6.1. 사망시 다시 시작 버튼 활성화 후 처음 스테이지로 시작
 
-   ![메인화면](https://github.com/user-attachments/assets/157fe56e-e4d2-45f0-991f-ce9381be49dc)
-
-
+![메인화면](https://github.com/user-attachments/assets/f4e5bb20-d148-456a-9ea2-74eb5db0952b)
+![인게임](https://github.com/user-attachments/assets/4be95c7e-fb89-4f7c-bb68-e6234943148f)
 
 ## 개발 일정
    - 1주차   4/8 ~ 4/14
