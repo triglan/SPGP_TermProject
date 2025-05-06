@@ -11,29 +11,27 @@ import com.example.deadlockduel.R;
 public class AnimSprite {
     private Bitmap bitmap;
     private Rect srcRect, dstRect;
-    private int frameCount = 4;
-    private int currentFrame = 0;
     private int frameWidth, frameHeight;
-    private long lastFrameTime = 0;
-    private long frameDelay = 150; // 밀리초
+    private int currentFrame = 0;
+    private int frameCount = 4;
+    private long lastTime = 0;
+    private long frameDelay = 150;
 
     public AnimSprite(Context context) {
         bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.player);
-        frameWidth = bitmap.getWidth() / 12;  // 전체가 12칸짜리 시트
-        frameHeight = bitmap.getHeight() / 9; // 9줄 중 첫 줄
-
-        dstRect = new Rect(300, 500, 300 + frameWidth * 3, 500 + frameHeight * 3); // 확대 위치
+        frameWidth = bitmap.getWidth() / frameCount;
+        frameHeight = bitmap.getHeight();
+        dstRect = new Rect(300, 300, 300 + frameWidth * 3, 300 + frameHeight * 3);
     }
 
     public void update() {
-        if (System.currentTimeMillis() - lastFrameTime > frameDelay) {
+        if (System.currentTimeMillis() - lastTime > frameDelay) {
             currentFrame = (currentFrame + 1) % frameCount;
-            lastFrameTime = System.currentTimeMillis();
+            lastTime = System.currentTimeMillis();
         }
 
         int left = currentFrame * frameWidth;
-        int top = 0;
-        srcRect = new Rect(left, top, left + frameWidth, top + frameHeight);
+        srcRect = new Rect(left, 0, left + frameWidth, frameHeight);
     }
 
     public void draw(Canvas canvas) {

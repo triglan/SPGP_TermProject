@@ -6,6 +6,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.View;
 
+import com.example.deadlockduel.game.AnimSprite;
+
 public class TileMapView extends View {
 
     private final int tileSize = 150;
@@ -17,6 +19,7 @@ public class TileMapView extends View {
 
     public TileMapView(Context context) {
         super(context);
+        playerAnim = new AnimSprite(context);
     }
 
     @Override
