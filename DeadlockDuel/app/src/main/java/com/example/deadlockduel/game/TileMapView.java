@@ -13,6 +13,8 @@ public class TileMapView extends View {
     private final int tileMargin = 20;
     private final Paint paint = new Paint();
 
+    private AnimSprite playerAnim; // 추가
+
     public TileMapView(Context context) {
         super(context);
     }
@@ -33,8 +35,13 @@ public class TileMapView extends View {
         }
 
         // 3. 플레이어 (가운데 위치)
-        paint.setColor(Color.BLUE);
-        int playerX = 100 + 2 * (tileSize + tileMargin);
-        canvas.drawRect(playerX, y - tileSize, playerX + tileSize, y, paint);
+//        paint.setColor(Color.BLUE);
+//        int playerX = 100 + 2 * (tileSize + tileMargin);
+//        canvas.drawRect(playerX, y - tileSize, playerX + tileSize, y, paint);
+        playerAnim.update();
+        playerAnim.draw(canvas);
+
+        // 4. 다음 프레임 요청
+        invalidate();
     }
 }
