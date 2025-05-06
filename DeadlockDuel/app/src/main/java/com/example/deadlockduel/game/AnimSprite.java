@@ -6,23 +6,25 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 
-import com.example.deadlockduel.R;
-
 public class AnimSprite {
-    private Bitmap bitmap;
-    private Rect srcRect, dstRect;
-    private int frameWidth = 67, frameHeight = 63, frameCount = 4;
+    private final Bitmap bitmap;
+    private final int frameCount;
+    private final int frameWidth;
+    private final int frameHeight;
+    private final int startWidth;  // 시작 가로
+    private final int startHeight;  // 시작 세로
     private int currentFrame = 0;
     private long lastTime = 0;
-    private long frameDelay = 150;
+    private final long frameDelay = 150;
 
-    public AnimSprite(Context context) {
-        bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.player);
-        int drawX = 600, drawY = 600; // 원하는 위치
-        int scale = 3; // 크기 3배 확대
-        dstRect = new Rect(drawX, drawY, drawX + frameWidth * scale,
-                drawY + frameHeight * scale);
 
+    public AnimSprite(Context context, int resId, int frameCount, int frameWidth, int frameHeight, int startWidth, int startHeight) {
+        this.frameCount = frameCount;
+        this.frameWidth = frameWidth;
+        this.frameHeight = frameHeight;
+        this.startWidth = startWidth;
+        this.startHeight = startHeight;
+        this.bitmap = BitmapFactory.decodeResource(context.getResources(), resId);
     }
 
     public void update() {
@@ -30,12 +32,21 @@ public class AnimSprite {
             currentFrame = (currentFrame + 1) % frameCount;
             lastTime = System.currentTimeMillis();
         }
-
-        int left = currentFrame * frameWidth;
-        srcRect = new Rect(left, 0, left + frameWidth, frameHeight);
     }
 
-    public void draw(Canvas canvas) {
-        canvas.drawBitmap(bitmap, srcRect, dstRect, null);
+    public void draw(Canvas canvas, int x, int y, int scale) {
+        int srcX = startWidth * frameWidth;                      // 열 고정
+        int srcY = (startHeight + currentFrame) * frameHeight;   // 행 증가
+        Rect src = new Rect(srcX, srcY, srcX + frameWidth, srcY + frameHeight);
+        Rect dst = new Rect(x, y, x + frameWidth * scale, y + frameHeight * scale);
+        canvas.drawBitmap(bitmap, src, dst, null);
+    }
+
+    public int getFrameWidth() {
+        return frameWidth;
+    }
+
+    public int getFrameHeight() {
+        return frameHeight;
     }
 }
