@@ -54,5 +54,6 @@ public class TileMapView extends View {
 
         player.update();
         player.draw(canvas);
+        invalidate(); // 계속 그리기 위해 필요
     }
 }

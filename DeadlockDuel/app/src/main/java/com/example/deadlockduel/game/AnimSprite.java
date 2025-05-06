@@ -13,17 +13,20 @@ public class AnimSprite {
     private final int frameHeight;
     private final int startWidth;  // 시작 가로
     private final int startHeight;  // 시작 세로
+    private final int scale;
     private int currentFrame = 0;
     private long lastTime = 0;
     private final long frameDelay = 150;
 
 
-    public AnimSprite(Context context, int resId, int frameCount, int frameWidth, int frameHeight, int startWidth, int startHeight) {
+    public AnimSprite(Context context, int resId, int frameCount, int frameWidth,
+                      int frameHeight, int startWidth, int startHeight, int scale) {
         this.frameCount = frameCount;
         this.frameWidth = frameWidth;
         this.frameHeight = frameHeight;
         this.startWidth = startWidth;
         this.startHeight = startHeight;
+        this.scale = scale;
         this.bitmap = BitmapFactory.decodeResource(context.getResources(), resId);
     }
 
@@ -34,7 +37,7 @@ public class AnimSprite {
         }
     }
 
-    public void draw(Canvas canvas, int x, int y, int scale) {
+    public void draw(Canvas canvas, int x, int y) {
         int srcX = startWidth * frameWidth;                      // 열 고정
         int srcY = (startHeight + currentFrame) * frameHeight;   // 행 증가
         Rect src = new Rect(srcX, srcY, srcX + frameWidth, srcY + frameHeight);
