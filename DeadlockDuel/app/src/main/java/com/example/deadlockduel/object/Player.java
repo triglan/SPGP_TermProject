@@ -5,10 +5,10 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 
 import com.example.deadlockduel.R;
-import com.example.deadlockduel.framework.Sprite;
+import com.example.deadlockduel.framework.SpriteFrames;
 
 public class Player {
-    private final Sprite sprite;
+    private final SpriteFrames sprite;
     private int blockIndex = 0;
     private int drawX, drawY;
 
@@ -16,14 +16,13 @@ public class Player {
     private final int frameInterval = 8;
 
     public Player(Resources res) {
-        float scale = 3f;
-        int offsetX = 0;
-        int offsetY = 47 + 5; // 하단 공백 보정값 (이미지에 따라 조정)
-        int startY = 47;
-        sprite = new Sprite(res, R.drawable.player,
-                4, true, 100, 128,
-                scale, offsetX, offsetY, startY);
-
+        int[] resIds = {
+                R.drawable.player_idle_1,
+                R.drawable.player_idle_2,
+                R.drawable.player_idle_3,
+                R.drawable.player_idle_4
+        };
+        sprite = new SpriteFrames(res, resIds, 1.0f, 0, 0);
     }
 
     public void setBlockIndex(int index) {
@@ -34,15 +33,17 @@ public class Player {
         return blockIndex;
     }
 
+    public void updateBlockState(Block[] blocks) {
+        for (int i = 0; i < blocks.length; i++) {
+            blocks[i].setHasPlayer(i == blockIndex);
+        }
+    }
+
     public void updatePositionFromBlock(Rect blockRect) {
-        int x = blockRect.centerX();
-        int y = blockRect.top;
-
-        int drawWidth = (int)(sprite.getWidth() * sprite.getScale());
-        int drawHeight = (int)(sprite.getHeight() * sprite.getScale());
-
-        drawX = x - drawWidth / 2;
-        drawY = y - drawHeight;
+        int drawWidth = sprite.getWidth();
+        int drawHeight = sprite.getHeight();
+        drawX = blockRect.centerX() - drawWidth / 2;
+        drawY = blockRect.top - drawHeight;
     }
 
     public void update() {

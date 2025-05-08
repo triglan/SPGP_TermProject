@@ -7,38 +7,44 @@ import android.graphics.Rect;
 
 public class Block {
     private final Rect rect;
-    private int color;
+    private boolean hasPlayer = false;
+    private boolean hasEnemy = false;
+    private boolean willBeAttacked = false;
 
-    public Block(Rect rect, int color) {
+    public Block(Rect rect) {
         this.rect = rect;
-        this.color = color;
     }
 
-    public void setColor(int color) {
-        this.color = color;
-    }
+    public void setHasPlayer(boolean value) { this.hasPlayer = value; }
+    public void setHasEnemy(boolean value) { this.hasEnemy = value; }
+    public void setWillBeAttacked(boolean value) { this.willBeAttacked = value; }
 
-    public void draw(Canvas canvas, Paint paint) {
-        // 내부 채우기
-        paint.setStyle(Paint.Style.FILL);
-        paint.setColor(color);
-        canvas.drawRect(rect, paint);
-
-        // 테두리
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(4f);
-        paint.setColor(Color.LTGRAY);
-        canvas.drawRect(rect, paint);
-
-        // 상태 초기화
-        paint.setStyle(Paint.Style.FILL);
+    public void reset() {
+        hasPlayer = false;
+        hasEnemy = false;
+        willBeAttacked = false;
     }
 
     public Rect getRect() {
         return rect;
     }
 
-    public int getColor() {
-        return color;
+    public void draw(Canvas canvas, Paint paint) {
+        if (willBeAttacked) {
+            paint.setColor(Color.RED);
+        } else if (hasEnemy) {
+            paint.setColor(Color.MAGENTA);
+        } else if (hasPlayer) {
+            paint.setColor(Color.GREEN);
+        } else {
+            paint.setColor(Color.GRAY);
+        }
+
+        canvas.drawRect(rect, paint);
+
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setColor(Color.LTGRAY);
+        canvas.drawRect(rect, paint);
+        paint.setStyle(Paint.Style.FILL);
     }
 }

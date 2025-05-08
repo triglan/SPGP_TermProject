@@ -4,7 +4,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.view.MotionEvent;
@@ -16,9 +15,9 @@ import com.example.deadlockduel.object.Player;
 
 public class MainScene implements Scene {
     private final Bitmap background;
-    private final Paint blockPaint = new Paint();
     private final Block[] blocks;
     private final Player player;
+    private final Paint blockPaint = new Paint();
 
     public MainScene(Resources res, int screenWidth, int screenHeight) {
         background = BitmapFactory.decodeResource(res, R.drawable.map1);
@@ -26,10 +25,6 @@ public class MainScene implements Scene {
         int blockCount = 5;
         int gridCount = 13;
         blocks = new Block[blockCount];
-
-        int[] blockColors = {
-                Color.RED, Color.GREEN, Color.BLACK, Color.RED, Color.GREEN
-        };
 
         int gridWidth = screenWidth / gridCount;
         int blockWidth = gridWidth;
@@ -41,16 +36,24 @@ public class MainScene implements Scene {
             int gridIndex = startIndex + i;
             int left = gridIndex * gridWidth;
             Rect rect = new Rect(left, top, left + blockWidth, top + blockHeight);
-            blocks[i] = new Block(rect, blockColors[i]);
+            blocks[i] = new Block(rect);  // ✅ 객체 초기화
         }
 
-        player = new Player(res); // 🔥 스프라이트 확대는 여기서
+        player = new Player(res);
         player.setBlockIndex(0);
     }
 
     @Override
     public void update() {
+        for (Block block : blocks) {
+            block.reset();
+        }
+
         player.update();
+        player.updateBlockState(blocks);
+        // 적 등장 전 → 여기는 주석
+        // blocks[enemyIndex].setHasEnemy(true);
+        // blocks[enemyAttackIndex].setWillBeAttacked(true);
     }
 
     @Override

@@ -11,19 +11,21 @@ public class Sprite {
     private final int frameCount;
     private final boolean isVertical;
     private final int frameWidth, frameHeight;
+    private final int characterHeight;
     private final float scale;
-    private final int offsetY;
     private final int offsetX;
+    private final int offsetY;
     private final int startY;
     private int frameIndex = 0;
 
     public Sprite(Resources res, int resId, int frameCount, boolean isVertical,
-                  int frameWidth, int frameHeight, float scale,
-                  int offsetX, int offsetY, int startY) {
+                  int frameWidth, int frameHeight, int characterHeight,
+                  float scale, int offsetX, int offsetY, int startY) {
         this.frameCount = frameCount;
         this.isVertical = isVertical;
         this.frameWidth = frameWidth;
         this.frameHeight = frameHeight;
+        this.characterHeight = characterHeight;
         this.scale = scale;
         this.offsetX = offsetX;
         this.offsetY = offsetY;
@@ -57,7 +59,7 @@ public class Sprite {
     }
 
     public int getHeight() {
-        return frameHeight;
+        return characterHeight;
     }
 
     public void draw(Canvas canvas, int x, int y) {
@@ -67,7 +69,10 @@ public class Sprite {
         int srcX = isVertical ? 0 : frameIndex * frameWidth;
         int srcY = isVertical ? startY + frameIndex * frameHeight : 0;
 
+        // src는 여전히 frameHeight 기준으로 자름
         Rect src = new Rect(srcX, srcY, srcX + frameWidth, srcY + frameHeight);
+
+        // dst는 characterHeight 기준으로 출력
         Rect dst = new Rect(
                 x + (int)(offsetX * scale),
                 y + (int)(offsetY * scale),
@@ -77,5 +82,4 @@ public class Sprite {
 
         canvas.drawBitmap(bitmap, src, dst, null);
     }
-
 }
