@@ -67,6 +67,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     private void drawGame(Canvas canvas) {
+        mainScene.update();
         mainScene.draw(canvas);  // 🔥 핵심: MainScene에 그리기 위임
     }
 }
