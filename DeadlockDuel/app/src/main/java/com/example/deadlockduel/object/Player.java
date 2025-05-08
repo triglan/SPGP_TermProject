@@ -12,8 +12,15 @@ public class Player {
     private int blockIndex = 0;
     private int drawX, drawY;
 
+    private int frameTick = 0;
+    private final int frameInterval = 8;
+
     public Player(Resources res) {
-        sprite = new Sprite(res, R.drawable.player, 4, true, 100, 100, 3.0f);
+        float scale = 3f;
+        int offsetY = 47 + 5; // 하단 공백 보정값 (이미지에 따라 조정)
+        int startY = 47;
+        sprite = new Sprite(res, R.drawable.player, 4, true, 100, 100, scale, offsetY, startY);
+
     }
 
     public void setBlockIndex(int index) {
@@ -36,7 +43,11 @@ public class Player {
     }
 
     public void update() {
-        // 프레임 애니메이션 등
+        frameTick++;
+        if (frameTick >= frameInterval) {
+            frameTick = 0;
+            sprite.setFrame(sprite.getFrameIndex() + 1);
+        }
     }
 
     public void draw(Canvas canvas) {
