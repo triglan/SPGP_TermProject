@@ -17,9 +17,12 @@ public class Player {
 
     public Player(Resources res) {
         float scale = 3f;
+        int offsetX = 0;
         int offsetY = 47 + 5; // 하단 공백 보정값 (이미지에 따라 조정)
         int startY = 47;
-        sprite = new Sprite(res, R.drawable.player, 4, true, 100, 128, scale, offsetY, startY);
+        sprite = new Sprite(res, R.drawable.player,
+                4, true, 100, 128,
+                scale, offsetX, offsetY, startY);
 
     }
 

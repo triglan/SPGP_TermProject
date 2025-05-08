@@ -13,16 +13,19 @@ public class Sprite {
     private final int frameWidth, frameHeight;
     private final float scale;
     private final int offsetY;
+    private final int offsetX;
     private final int startY;
     private int frameIndex = 0;
 
     public Sprite(Resources res, int resId, int frameCount, boolean isVertical,
-                  int frameWidth, int frameHeight, float scale, int offsetY, int startY) {
+                  int frameWidth, int frameHeight, float scale,
+                  int offsetX, int offsetY, int startY) {
         this.frameCount = frameCount;
         this.isVertical = isVertical;
         this.frameWidth = frameWidth;
         this.frameHeight = frameHeight;
         this.scale = scale;
+        this.offsetX = offsetX;
         this.offsetY = offsetY;
         this.startY = startY;
 
@@ -65,8 +68,14 @@ public class Sprite {
         int srcY = isVertical ? startY + frameIndex * frameHeight : 0;
 
         Rect src = new Rect(srcX, srcY, srcX + frameWidth, srcY + frameHeight);
-        Rect dst = new Rect(x, y + (int)(offsetY * scale), x + drawWidth, y + drawHeight + (int)(offsetY * scale));
+        Rect dst = new Rect(
+                x + (int)(offsetX * scale),
+                y + (int)(offsetY * scale),
+                x + (int)(offsetX * scale) + drawWidth,
+                y + (int)(offsetY * scale) + drawHeight
+        );
 
         canvas.drawBitmap(bitmap, src, dst, null);
     }
+
 }
