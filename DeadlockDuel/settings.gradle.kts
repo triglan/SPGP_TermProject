@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Deadlock Duel"
+rootProject.name = "DeadlockDuel"
 include(":app")
  
