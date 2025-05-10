@@ -30,17 +30,17 @@ public class DeadlockDuelActivity extends AppCompatActivity {
 
         btnLeft.setOnClickListener(v -> {
             player.moveLeft();
-            nextTurn();
+            gameView.onPlayerActionFinished();
         });
 
         btnRight.setOnClickListener(v -> {
             player.moveRight();
-            nextTurn();
+            gameView.onPlayerActionFinished();
         });
 
         btnRotate.setOnClickListener(v -> {
             player.rotate();
-            nextTurn();
+            gameView.onPlayerActionFinished();
         });
     }
 

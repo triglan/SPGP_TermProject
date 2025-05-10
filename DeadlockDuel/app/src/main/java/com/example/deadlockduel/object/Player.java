@@ -80,8 +80,8 @@ public class Player {
 
     public void reset(int blockIndex, boolean faceRight) {
         this.blockIndex = blockIndex;
-        this.direction = faceRight ? 1 : -1;
-        this.flipped = !faceRight;
+        this.direction = faceRight ? -1 : 1;
+        this.flipped = faceRight; // true면 왼쪽 보게
     }
 
     public void rotate() {
