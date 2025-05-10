@@ -25,6 +25,9 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     private int animationFrame = 0;
     private final int MAX_ANIMATION_FRAMES = 15;
 
+    private enum TurnState { PLAYER_TURN, ENEMY_TURN }
+    private TurnState turnState = TurnState.PLAYER_TURN;
+
     public GameView(Context context) {
         super(context);
         init(context);
@@ -45,7 +48,6 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         StageConfig config = stageManager.getCurrentStage();
         mainScene = new MainScene(getResources(), width, height, config);
 
-        // 턴 텍스트 스타일
         turnTextPaint = new Paint();
         turnTextPaint.setColor(Color.BLUE);
         turnTextPaint.setTextSize(50);
@@ -61,14 +63,30 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             StageConfig config = stageManager.getCurrentStage();
             mainScene = new MainScene(getResources(), width, height, config);
             turnCount = 1;
+            turnState = TurnState.PLAYER_TURN;
             return true;
         }
         return false;
     }
 
+    public void onPlayerActionFinished() {
+        if (turnState != TurnState.PLAYER_TURN) return;
+
+        turnState = TurnState.ENEMY_TURN;
+
+        // 적의 턴 처리
+        mainScene.updateEnemies();
+
+        // 턴 증가 및 애니메이션
+        nextTurn();
+
+        // 다시 플레이어 턴으로
+        turnState = TurnState.PLAYER_TURN;
+    }
+
     public void nextTurn() {
         turnCount++;
-        turnTextScale = 1.5f;           // 텍스트 확대 시작
+        turnTextScale = 1.5f;
         animationFrame = 0;
         isAnimatingTurnText = true;
     }
@@ -93,11 +111,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         drawThread.start();
     }
 
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {}
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
+    @Override public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {}
+    @Override public void surfaceDestroyed(SurfaceHolder holder) {
         drawThread.setRunning(false);
     }
 
@@ -131,23 +146,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         }
     }
 
-    public Player getPlayer() {
-        return this.mainScene.getPlayer();
-    }
-
-    public int getBlockCount() {
-        return this.mainScene.getBlockCount();
-    }
-
-    public void onPlayerActionFinished() {
-        // TODO: 적 행동 먼저 실행
-        // ex) enemyManager.updateEnemies();
-
-        nextTurn(); // 적도 다 했으면 턴 증가
-    }
-
     private void drawGame(Canvas canvas) {
-        mainScene.update();
+        mainScene.update(); // 플레이어만 업데이트
         updateTurnAnimation();
         mainScene.draw(canvas);
 
@@ -155,8 +155,16 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         int topMargin = 80;
 
         canvas.save();
-        canvas.scale(turnTextScale, turnTextScale, centerX, topMargin); // 확대 중심 기준
+        canvas.scale(turnTextScale, turnTextScale, centerX, topMargin);
         canvas.drawText("Turn : " + turnCount, centerX, topMargin, turnTextPaint);
         canvas.restore();
+    }
+
+    public Player getPlayer() {
+        return this.mainScene.getPlayer();
+    }
+
+    public int getBlockCount() {
+        return this.mainScene.getBlockCount();
     }
 }

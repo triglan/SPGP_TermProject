@@ -1,17 +1,20 @@
-// framework/StageConfig.java
-
 package com.example.deadlockduel.framework;
+
+import java.util.List;
 
 public class StageConfig {
     public final int backgroundResId;
     public final int blockCount;
     public final int playerStartIndex;
     public final boolean playerFaceRight;
+    public final List<EnemySpawnData> enemies;
 
-    public StageConfig(int backgroundResId, int blockCount, int playerStartIndex, boolean playerFaceRight) {
+    public StageConfig(int backgroundResId, int blockCount, int playerStartIndex,
+                       boolean playerFaceRight, List<EnemySpawnData> enemies) {
         this.backgroundResId = backgroundResId;
         this.blockCount = blockCount;
         this.playerStartIndex = playerStartIndex;
         this.playerFaceRight = playerFaceRight;
+        this.enemies = enemies;
     }
 }

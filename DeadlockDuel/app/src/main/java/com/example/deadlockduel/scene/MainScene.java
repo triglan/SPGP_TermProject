@@ -9,18 +9,25 @@ import android.graphics.Rect;
 import android.view.MotionEvent;
 
 import com.example.deadlockduel.R;
+import com.example.deadlockduel.framework.EnemySpawnData;
 import com.example.deadlockduel.framework.Scene;
-import com.example.deadlockduel.object.Block;
-import com.example.deadlockduel.object.Player;
 import com.example.deadlockduel.framework.StageConfig;
+import com.example.deadlockduel.object.Block;
+import com.example.deadlockduel.object.Enemy;
+import com.example.deadlockduel.object.Enemy_Knight;
+import com.example.deadlockduel.object.Player;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainScene implements Scene {
     private Bitmap background;
     private Block[] blocks;
     private Player player;
     private Paint blockPaint = new Paint();
+    private List<Enemy> enemies;
 
-    private int blockCount; // ✅ 변경: 지역변수 → 멤버변수로 승격
+    private int blockCount;
 
     public Player getPlayer() {
         return this.player;
@@ -53,8 +60,29 @@ public class MainScene implements Scene {
         player = new Player(res);
         player.setBlockCount(blockCount);
         player.reset(config.playerStartIndex, config.playerFaceRight);
+
+        enemies = new ArrayList<>();
+        for (EnemySpawnData spawn : config.enemies) {
+            Enemy enemy = createEnemyFromType(res, spawn.type, spawn.blockIndex, spawn.faceRight);
+            enemy.setBlockCount(blockCount);
+            enemy.updateBlockState(blocks);
+            enemy.updatePositionFromBlock(blocks[spawn.blockIndex].getRect());
+            enemies.add(enemy);
+        }
     }
 
+    private Enemy createEnemyFromType(Resources res, String type, int index, boolean faceRight) {
+        switch (type) {
+            case "knight":
+                return new Enemy_Knight(res, index, faceRight);
+            // case "archer": return new Enemy_Archer(...);
+            // case "rogue": return new Enemy_Rogue(...);
+            default:
+                throw new IllegalArgumentException("Unknown enemy type: " + type);
+        }
+    }
+
+    // 플레이어만 업데이트 (턴 중 항상 호출됨)
     @Override
     public void update() {
         for (Block block : blocks) {
@@ -63,8 +91,14 @@ public class MainScene implements Scene {
 
         player.update();
         player.updateBlockState(blocks);
-        // blocks[enemyIndex].setHasEnemy(true);
-        // blocks[enemyAttackIndex].setWillBeAttacked(true);
+    }
+
+    // 적의 턴일 때 호출 (GameView에서 직접 호출)
+    public void updateEnemies() {
+        for (Enemy enemy : enemies) {
+            enemy.update(player);
+            enemy.updateBlockState(blocks);
+        }
     }
 
     @Override
@@ -74,6 +108,12 @@ public class MainScene implements Scene {
 
         for (Block block : blocks) {
             block.draw(canvas, blockPaint);
+        }
+
+        for (Enemy enemy : enemies) {
+            Rect blockRect = blocks[enemy.getBlockIndex()].getRect();
+            enemy.updatePositionFromBlock(blockRect);
+            enemy.draw(canvas);
         }
 
         Rect playerBlockRect = blocks[player.getBlockIndex()].getRect();
