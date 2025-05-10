@@ -12,7 +12,7 @@ public class StageManager {
     public StageManager() {
         // 🗺️ Stage 1: Knight 1마리
         List<EnemySpawnData> enemies1 = new ArrayList<>();
-        enemies1.add(new EnemySpawnData("knight", 4, true));
+        enemies1.add(new EnemySpawnData("knight", 4, false));
         stages.add(new StageConfig(R.drawable.map1, 5, 0, true, enemies1));
 
 //        // 🗺️ Stage 2: Knight + Archer
