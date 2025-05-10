@@ -12,17 +12,28 @@ import com.example.deadlockduel.R;
 import com.example.deadlockduel.framework.Scene;
 import com.example.deadlockduel.object.Block;
 import com.example.deadlockduel.object.Player;
+import com.example.deadlockduel.framework.StageConfig;
 
 public class MainScene implements Scene {
-    private final Bitmap background;
-    private final Block[] blocks;
-    private final Player player;
-    private final Paint blockPaint = new Paint();
+    private Bitmap background;
+    private Block[] blocks;
+    private Player player;
+    private Paint blockPaint = new Paint();
 
-    public MainScene(Resources res, int screenWidth, int screenHeight) {
-        background = BitmapFactory.decodeResource(res, R.drawable.map1);
+    private int blockCount; // ✅ 변경: 지역변수 → 멤버변수로 승격
 
-        int blockCount = 5;
+    public Player getPlayer() {
+        return this.player;
+    }
+
+    public int getBlockCount() {
+        return blockCount;
+    }
+
+    public MainScene(Resources res, int screenWidth, int screenHeight, StageConfig config) {
+        background = BitmapFactory.decodeResource(res, config.backgroundResId);
+
+        this.blockCount = config.blockCount;
         int gridCount = 13;
         blocks = new Block[blockCount];
 
@@ -36,11 +47,12 @@ public class MainScene implements Scene {
             int gridIndex = startIndex + i;
             int left = gridIndex * gridWidth;
             Rect rect = new Rect(left, top, left + blockWidth, top + blockHeight);
-            blocks[i] = new Block(rect);  // ✅ 객체 초기화
+            blocks[i] = new Block(rect);
         }
 
         player = new Player(res);
-        player.setBlockIndex(0);
+        player.setBlockCount(blockCount);
+        player.reset(config.playerStartIndex, config.playerFaceRight);
     }
 
     @Override
@@ -51,7 +63,6 @@ public class MainScene implements Scene {
 
         player.update();
         player.updateBlockState(blocks);
-        // 적 등장 전 → 여기는 주석
         // blocks[enemyIndex].setHasEnemy(true);
         // blocks[enemyAttackIndex].setWillBeAttacked(true);
     }
