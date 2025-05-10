@@ -20,7 +20,7 @@ public class Enemy_Knight extends Enemy {
                 R.drawable.knight_idle_3,
                 R.drawable.knight_idle_4
         };
-        SpriteFrames sprite = new SpriteFrames(res, resIds, 0.8f, 0, 0);
+        SpriteFrames sprite = new SpriteFrames(res, resIds, 0.8f, 0, 3);
         setSprite(sprite);
     }
 

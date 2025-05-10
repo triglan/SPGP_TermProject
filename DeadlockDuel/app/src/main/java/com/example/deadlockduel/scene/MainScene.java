@@ -91,6 +91,10 @@ public class MainScene implements Scene {
 
         player.update();
         player.updateBlockState(blocks);
+        for (Enemy enemy : enemies) {
+            enemy.update(); // ✅ 매 프레임마다 호출
+            enemy.updateBlockState(blocks);
+        }
     }
 
     // 적의 턴일 때 호출 (GameView에서 직접 호출)
