@@ -99,8 +99,9 @@ public class MainScene implements Scene {
 
     // 적의 턴일 때 호출 (GameView에서 직접 호출)
     public void updateEnemies() {
+        Enemy[] enemyArray = enemies.toArray(new Enemy[0]);
         for (Enemy enemy : enemies) {
-            enemy.act(player);
+            enemy.act(player, enemyArray);
             enemy.updateBlockState(blocks);
         }
     }

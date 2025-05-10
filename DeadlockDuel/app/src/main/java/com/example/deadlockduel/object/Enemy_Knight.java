@@ -10,8 +10,8 @@ public class Enemy_Knight extends Enemy {
     public Enemy_Knight(Resources res, int blockIndex, boolean faceRight) {
         super();
         this.blockIndex = blockIndex;
-        this.direction = faceRight ? -1 : 1;
-        this.flipped = faceRight;
+        this.direction = faceRight ? 1 : -1;
+        this.facingRight = faceRight;
         this.hp = 2;
 
         int[] resIds = {
@@ -20,21 +20,36 @@ public class Enemy_Knight extends Enemy {
                 R.drawable.knight_idle_3,
                 R.drawable.knight_idle_4
         };
-        SpriteFrames sprite = new SpriteFrames(res, resIds, 0.8f, 0, 3);
-        setSprite(sprite);
+        setSprite(new SpriteFrames(res, resIds, 0.8f, 0, 3));
     }
 
     @Override
-    public void act(Player player) {
+    public void act(Player player, Enemy[] enemies) {
         if (isDead()) return;
 
         int playerIndex = player.getBlockIndex();
-        int dist = playerIndex - this.blockIndex;
+        if ((playerIndex < blockIndex && direction != -1) ||
+                (playerIndex > blockIndex && direction != 1)) {
+            rotate();
+        }
 
-        // 1칸 차이면 공격, 아니면 이동
+        boolean blocked = false;
+        int start = Math.min(playerIndex, blockIndex) + 1;
+        int end = Math.max(playerIndex, blockIndex);
+        for (Enemy e : enemies) {
+            if (e == this || e.isDead()) continue;
+            int idx = e.getBlockIndex();
+            if (idx >= start && idx < end) {
+                blocked = true;
+                break;
+            }
+        }
+
+        if (blocked) return;
+
+        int dist = playerIndex - blockIndex;
         if (Math.abs(dist) == 1) {
-            Log.d("Enemy_Knight", "공격!");
-            // TODO: 공격 구현
+            Log.d("Enemy_Knight", "근접 공격!");
         } else if (dist > 1) {
             moveRight();
         } else if (dist < -1) {
