@@ -12,21 +12,27 @@ public class StageManager {
     public StageManager() {
         // 🗺️ Stage 1: Knight 1마리
         List<EnemySpawnData> enemies1 = new ArrayList<>();
-        enemies1.add(new EnemySpawnData("knight", 4, false));
-        stages.add(new StageConfig(R.drawable.map1, 5, 0, true, enemies1));
+        enemies1.add(new EnemySpawnData("knight", 6, false));
+        enemies1.add(new EnemySpawnData("archer", 5, false));
+        addStage(R.drawable.map1, 7, 0, true, enemies1);
 
-//        // 🗺️ Stage 2: Knight + Archer
-//        List<EnemySpawnData> enemies2 = new ArrayList<>();
-//        enemies2.add(new EnemySpawnData("knight", 3, true));
-//        enemies2.add(new EnemySpawnData("archer", 4, true));
-//        stages.add(new StageConfig(R.drawable.map2, 6, 1, false, enemies2));
-//
-//        // 🗺️ Stage 3: Knight + Archer + Rogue
-//        List<EnemySpawnData> enemies3 = new ArrayList<>();
-//        enemies3.add(new EnemySpawnData("knight", 2, true));
-//        enemies3.add(new EnemySpawnData("archer", 4, true));
-//        enemies3.add(new EnemySpawnData("rogue", 5, false));
-//        stages.add(new StageConfig(R.drawable.map3, 7, 3, true, enemies3));
+        // 🗺️ Stage 2: Knight + Archer
+        List<EnemySpawnData> enemies2 = new ArrayList<>();
+        enemies2.add(new EnemySpawnData("knight", 3, true));
+        enemies2.add(new EnemySpawnData("archer", 4, true));
+        addStage(R.drawable.map2, 6, 1, false, enemies2);
+
+        // 🗺️ Stage 3: Knight + Archer + Rogue
+        List<EnemySpawnData> enemies3 = new ArrayList<>();
+        enemies3.add(new EnemySpawnData("knight", 2, true));
+        enemies3.add(new EnemySpawnData("archer", 4, true));
+        enemies3.add(new EnemySpawnData("rogue", 5, false));
+        addStage(R.drawable.map3, 7, 3, true, enemies3);
+    }
+
+    // ✅ 스테이지 추가 헬퍼 메서드
+    private void addStage(int backgroundResId, int blockCount, int playerStartIndex, boolean playerFaceRight, List<EnemySpawnData> enemies) {
+        stages.add(new StageConfig(backgroundResId, blockCount, playerStartIndex, playerFaceRight, enemies));
     }
 
     public StageConfig getCurrentStage() {

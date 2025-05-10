@@ -4,7 +4,7 @@ import java.util.List;
 
 public class StageConfig {
     public final int backgroundResId;
-    public final int blockCount;
+    public int blockCount;
     public final int playerStartIndex;
     public final boolean playerFaceRight;
     public final List<EnemySpawnData> enemies;
@@ -16,5 +16,9 @@ public class StageConfig {
         this.playerStartIndex = playerStartIndex;
         this.playerFaceRight = playerFaceRight;
         this.enemies = enemies;
+    }
+
+    public int getBlockCount() {
+        return blockCount;
     }
 }

@@ -8,13 +8,14 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.view.MotionEvent;
 
-import com.example.deadlockduel.R;
 import com.example.deadlockduel.framework.EnemySpawnData;
 import com.example.deadlockduel.framework.Scene;
 import com.example.deadlockduel.framework.StageConfig;
 import com.example.deadlockduel.object.Block;
 import com.example.deadlockduel.object.Enemy;
 import com.example.deadlockduel.object.Enemy_Knight;
+import com.example.deadlockduel.object.Enemy_Archer;
+import com.example.deadlockduel.object.Enemy_Rogue;
 import com.example.deadlockduel.object.Player;
 
 import java.util.ArrayList;
@@ -73,10 +74,9 @@ public class MainScene implements Scene {
 
     private Enemy createEnemyFromType(Resources res, String type, int index, boolean faceRight) {
         switch (type) {
-            case "knight":
-                return new Enemy_Knight(res, index, faceRight);
-            // case "archer": return new Enemy_Archer(...);
-            // case "rogue": return new Enemy_Rogue(...);
+            case "knight": return new Enemy_Knight(res, index, faceRight);
+            case "archer": return new Enemy_Archer(res, index, faceRight);
+            case "rogue":  return new Enemy_Rogue(res, index, faceRight);
             default:
                 throw new IllegalArgumentException("Unknown enemy type: " + type);
         }
@@ -92,7 +92,7 @@ public class MainScene implements Scene {
         player.update();
         player.updateBlockState(blocks);
         for (Enemy enemy : enemies) {
-            enemy.update(); // ✅ 매 프레임마다 호출
+            enemy.updateAnimation(); // ✅ 매 프레임마다 호출
             enemy.updateBlockState(blocks);
         }
     }
@@ -100,7 +100,7 @@ public class MainScene implements Scene {
     // 적의 턴일 때 호출 (GameView에서 직접 호출)
     public void updateEnemies() {
         for (Enemy enemy : enemies) {
-            enemy.update(player);
+            enemy.act(player);
             enemy.updateBlockState(blocks);
         }
     }

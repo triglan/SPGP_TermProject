@@ -1,12 +1,10 @@
 package com.example.deadlockduel.object;
 
-import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.util.Log;
 
 import com.example.deadlockduel.framework.SpriteFrames;
-import com.example.deadlockduel.R;
 
 public class Enemy {
     protected SpriteFrames sprite;
@@ -38,8 +36,8 @@ public class Enemy {
     }
 
     public void updateBlockState(Block[] blocks) {
-        for (int i = 0; i < blocks.length; i++) {
-            blocks[i].setHasEnemy(i == blockIndex);
+        if (blockIndex >= 0 && blockIndex < blocks.length) {
+            blocks[blockIndex].setHasEnemy(true); // ✅ 현재 적 위치만 true
         }
     }
 
@@ -88,11 +86,11 @@ public class Enemy {
         this.flipped = flipped;
     }
 
-    public void update(Player player) {
+    public void act(Player player) {
         // 기본 구현은 없음 (자식 클래스에서 오버라이드)
     }
 
-    public void update() {
+    public void updateAnimation() {
         frameTick++;
         if (frameTick >= frameInterval) {
             frameTick = 0;
