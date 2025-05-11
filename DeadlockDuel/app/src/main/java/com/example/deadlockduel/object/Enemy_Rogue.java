@@ -28,9 +28,11 @@ public class Enemy_Rogue extends Enemy {
         if (isDead()) return;
 
         int playerIndex = player.getBlockIndex();
-        if ((playerIndex < blockIndex && direction != -1) ||
-                (playerIndex > blockIndex && direction != 1)) {
+        int dist = playerIndex - this.blockIndex;
+
+        if ((dist < 0 && direction != -1) || (dist > 0 && direction != 1)) {
             rotate();
+            return;
         }
 
         boolean blocked = false;
@@ -44,11 +46,11 @@ public class Enemy_Rogue extends Enemy {
                 break;
             }
         }
-
         if (blocked) return;
 
-        if (Math.abs(playerIndex - blockIndex) == 1) {
+        if (Math.abs(dist) == 1) {
             Log.d("Enemy_Rogue", "근접 공격!");
+            // TODO: 공격 큐 등록
         }
     }
 }

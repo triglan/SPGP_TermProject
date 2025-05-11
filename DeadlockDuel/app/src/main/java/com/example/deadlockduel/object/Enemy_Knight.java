@@ -28,11 +28,16 @@ public class Enemy_Knight extends Enemy {
         if (isDead()) return;
 
         int playerIndex = player.getBlockIndex();
-        if ((playerIndex < blockIndex && direction != -1) ||
-                (playerIndex > blockIndex && direction != 1)) {
+        int dist = playerIndex - this.blockIndex;
+
+        // 1. 방향이 다르면 회전하고 끝
+        if ((dist < 0 && direction != -1) || (dist > 0 && direction != 1)) {
+            Log.d("Enemy_Knight", "회전!");
             rotate();
+            return;
         }
 
+        // 2. 앞에 다른 적이 있으면 정지
         boolean blocked = false;
         int start = Math.min(playerIndex, blockIndex) + 1;
         int end = Math.max(playerIndex, blockIndex);
@@ -41,15 +46,16 @@ public class Enemy_Knight extends Enemy {
             int idx = e.getBlockIndex();
             if (idx >= start && idx < end) {
                 blocked = true;
+                Log.d("Enemy_Knight", "정지!");
                 break;
             }
         }
-
         if (blocked) return;
 
-        int dist = playerIndex - blockIndex;
+        // 3. 1칸 차이면 공격, 아니면 이동
         if (Math.abs(dist) == 1) {
             Log.d("Enemy_Knight", "근접 공격!");
+            // TODO: 공격 큐 등록
         } else if (dist > 1) {
             moveRight();
         } else if (dist < -1) {
