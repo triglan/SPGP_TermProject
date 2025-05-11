@@ -4,9 +4,11 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.widget.Button;
 
 import com.example.deadlockduel.R;
 import com.example.deadlockduel.scene.MainScene;
@@ -53,6 +55,16 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         turnTextPaint.setTextSize(50);
         turnTextPaint.setTextAlign(Paint.Align.CENTER);
         turnTextPaint.setFakeBoldText(true);
+
+//        if (context instanceof android.app.Activity) {
+//            android.app.Activity activity = (android.app.Activity) context;
+//            Button btnAttackExecute = activity.findViewById(R.id.btnAttackExecute);
+//            if (btnAttackExecute != null) {
+//                btnAttackExecute.setOnClickListener(v -> {
+//                    mainScene.executeAllAttacks();  // ✅ 큐에 들어간 공격 실행!
+//                });
+//            }
+//        }
     }
 
     public boolean nextStage() {
@@ -159,6 +171,31 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         canvas.drawText("Turn : " + turnCount, centerX, topMargin, turnTextPaint);
         canvas.restore();
     }
+
+    public void playEffect(AttackType type) {
+        mainScene.performAttack(type);  // AttackCommand.execute() → enemy.hit() + effect 출력
+        int direction = mainScene.getPlayer().getDirection();
+        int playerIndex = mainScene.getPlayer().getBlockIndex();
+        int targetBlock = playerIndex + direction;
+
+        if (targetBlock < 0 || targetBlock >= mainScene.getBlockCount()) return;
+
+        Rect rect = mainScene.getBlockRect(targetBlock);
+        int effectX = rect.centerX() - type.effectFrames[0].getWidth() / 2;
+        int effectY = rect.centerY() - type.effectFrames[0].getHeight() / 2 + type.offsetY;
+        boolean finalFacingRight = (direction == 1) == type.effectFacesRight;
+
+        mainScene.getEffects().add(
+                new com.example.deadlockduel.framework.AttackEffect(
+                        type.effectFrames,
+                        effectX,
+                        effectY,
+                        finalFacingRight,
+                        false
+                )
+        );
+    }
+
 
     public Player getPlayer() {
         return this.mainScene.getPlayer();

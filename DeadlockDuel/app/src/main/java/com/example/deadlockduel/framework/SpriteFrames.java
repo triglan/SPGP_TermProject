@@ -4,7 +4,9 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Bitmap;
 
 public class SpriteFrames {
     private final Bitmap[] frames;
@@ -48,6 +50,15 @@ public class SpriteFrames {
                 x + (int)(offsetX * scale),
                 y + (int)(offsetY * scale),
                 null
+        );
+    }
+    public void draw(Canvas canvas, int x, int y, Paint paint) {
+        Bitmap frame = frames[frameIndex];
+        canvas.drawBitmap(
+                frame,
+                x + (int) (offsetX * scale),
+                y + (int) (offsetY * scale),
+                paint
         );
     }
 

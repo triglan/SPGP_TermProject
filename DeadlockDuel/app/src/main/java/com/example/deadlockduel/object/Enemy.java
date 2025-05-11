@@ -1,25 +1,32 @@
 package com.example.deadlockduel.object;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
-import android.util.Log;
-
 import com.example.deadlockduel.framework.SpriteFrames;
+import java.util.List;
+import com.example.deadlockduel.framework.AttackCommand;
 
 public abstract class Enemy {
     protected SpriteFrames sprite;
     protected int blockIndex = 0;
     protected int drawX, drawY;
     protected int direction = 1;
-    protected static final int TILE_WIDTH = 100;
     protected boolean facingRight = true;
     protected int frameTick = 0;
     protected final int frameInterval = 8;
     protected int blockCount;
     protected boolean isDead = false;
-    protected int hp;
 
-    public Enemy() { }
+    protected int hp = 5;
+    protected int maxHp = 5;
+
+    // ✅ 피격 연출용 변수
+    protected int hitFlashTimer = 0;
+    protected int hitShakeTimer = 0;
 
     public void setBlockCount(int count) {
         this.blockCount = count;
@@ -33,9 +40,33 @@ public abstract class Enemy {
         return blockIndex;
     }
 
+    public void setHp(int hp) {
+        this.hp = hp;
+        this.maxHp = hp;
+    }
+
+    public int getHp() {
+        return hp;
+    }
+
+    public int getMaxHp() {
+        return maxHp;
+    }
+
+    public void hit(int damage) {
+        if (isDead) return;
+        hp -= damage;
+        if (hp <= 0) {
+            hp = 0;
+            isDead = true;
+        }
+        hitFlashTimer = 6;
+        hitShakeTimer = 6;
+    }
+
     public void updateBlockState(Block[] blocks) {
         if (blockIndex >= 0 && blockIndex < blocks.length) {
-            blocks[blockIndex].setHasEnemy(true);
+            blocks[blockIndex].setHasEnemy(!isDead);
         }
     }
 
@@ -47,17 +78,11 @@ public abstract class Enemy {
     }
 
     public void moveLeft() {
-        if (blockIndex > 0) {
-            blockIndex--;
-            Log.d("Enemy", "← 이동: blockIndex = " + blockIndex);
-        }
+        if (blockIndex > 0) blockIndex--;
     }
 
     public void moveRight() {
-        if (blockIndex < blockCount - 1) {
-            blockIndex++;
-            Log.d("Enemy", "→ 이동: blockIndex = " + blockIndex);
-        }
+        if (blockIndex < blockCount - 1) blockIndex++;
     }
 
     public void reset(int blockIndex, boolean faceRight) {
@@ -69,10 +94,9 @@ public abstract class Enemy {
     public void rotate() {
         this.direction *= -1;
         this.facingRight = (direction == 1);
-        Log.d("Enemy", "⟳ 회전: direction = " + direction);
     }
 
-    public abstract void act(Player player, Enemy[] enemies);
+    public abstract void act(Player player, Enemy[] enemies, List<AttackCommand> attackQueue);
 
     public void updateAnimation() {
         frameTick++;
@@ -86,27 +110,66 @@ public abstract class Enemy {
 
     public void draw(Canvas canvas) {
         if (sprite == null || isDead) return;
+
         canvas.save();
+
+        // ✅ 흔들림 처리
+        // int shakeOffset = (hitShakeTimer > 0) ? ((hitShakeTimer % 2 == 0) ? -6 : 6) : 0;
+        int shakeOffset = 0;
+        if (hitShakeTimer > 0) {
+            int shakePhase = (hitShakeTimer / 4) % 2;
+            shakeOffset = (shakePhase == 0) ? -4 : 4;
+        }
+        canvas.translate(shakeOffset, 0);
+
+        // 방향 처리
         if (facingRight) {
             canvas.scale(-1, 1, drawX + sprite.getWidth() / 2f, drawY + sprite.getHeight() / 2f);
         }
-        sprite.draw(canvas, drawX, drawY);
+
+        // ✅ 반짝임 처리
+        if (hitFlashTimer > 0) {
+            Paint flashPaint = new Paint();
+            flashPaint.setColorFilter(new PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP));
+            sprite.draw(canvas, drawX, drawY, flashPaint);
+            hitFlashTimer--;
+        } else {
+            sprite.draw(canvas, drawX, drawY);
+        }
+
         canvas.restore();
+
+        if (hitShakeTimer > 0) hitShakeTimer--;
+
+        Paint hpPaint = new Paint();
+        hpPaint.setColor(Color.GREEN);
+        hpPaint.setTextAlign(Paint.Align.CENTER);
+        hpPaint.setTextSize(28f);
+        canvas.drawText("HP: " + this.hp, drawX + sprite.getWidth() / 2f, drawY - 25, hpPaint);
+        // ✅ HP 바 그리기
+        Paint backPaint = new Paint();
+        backPaint.setColor(Color.RED);
+        hpPaint.setColor(Color.GREEN);
+
+        int barWidth = sprite.getWidth();
+        int barHeight = 8;
+        int barX = drawX;
+        int barY = drawY - 16;
+
+        canvas.drawRect(barX, barY, barX + barWidth, barY + barHeight, backPaint);
+        float ratio = (float) hp / maxHp;
+        canvas.drawRect(barX, barY, barX + (int)(barWidth * ratio), barY + barHeight, hpPaint);
     }
 
     public boolean isDead() {
         return isDead;
     }
 
-    public void kill() {
-        this.isDead = true;
+    public SpriteFrames getSprite() {
+        return sprite;
     }
 
     public void setSprite(SpriteFrames sprite) {
         this.sprite = sprite;
-    }
-
-    public SpriteFrames getSprite() {
-        return sprite;
     }
 }

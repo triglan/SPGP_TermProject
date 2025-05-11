@@ -33,7 +33,7 @@ public class Block {
         if (willBeAttacked) {
             paint.setColor(Color.RED);
         } else if (hasEnemy) {
-            paint.setColor(Color.MAGENTA);
+            paint.setColor(Color.BLUE);
         } else if (hasPlayer) {
             paint.setColor(Color.GREEN);
         } else {

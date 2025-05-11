@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/gameRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -32,6 +33,46 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="⟳" />
+
+        <!-- 공격 버튼: 이미지 버튼 버전 -->
+        <ImageButton
+            android:id="@+id/btnAttack1"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="4dp"
+            android:src="@drawable/attack_icon_melee"
+            android:background="@android:color/transparent"
+            app:tint="@null"
+            android:scaleType="fitCenter"
+            android:contentDescription="공격1" />
+
+        <ImageButton
+            android:id="@+id/btnAttack2"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="4dp"
+            android:src="@drawable/attack_icon_range"
+            android:background="@android:color/transparent"
+            app:tint="@null"
+            android:scaleType="fitCenter"
+            android:contentDescription="공격2" />
+
+        <ImageButton
+            android:id="@+id/btnAttack3"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="4dp"
+            android:src="@drawable/attack_icon_power"
+            android:background="@android:color/transparent"
+            app:tint="@null"
+            android:scaleType="fitCenter"
+            android:contentDescription="공격3" />
+
+<!--        <Button-->
+<!--            android:id="@+id/btnAttackExecute"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Attack" />-->
 
         <Button
             android:id="@+id/btnRight"

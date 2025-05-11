@@ -2,6 +2,8 @@ package com.example.deadlockduel.object;
 
 import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.Log;
 
@@ -17,6 +19,7 @@ public class Player {
     private boolean facingRight = true;
     private int frameTick = 0;
     private final int frameInterval = 8;
+    private int hp = 5, maxHp = 10;
 
     private int blockCount;
 
@@ -41,6 +44,12 @@ public class Player {
     public int getBlockIndex() {
         return blockIndex;
     }
+
+    public int getDirection() {
+        return direction;
+    }
+
+
 
     public void updateBlockState(Block[] blocks) {
         for (int i = 0; i < blocks.length; i++) {
@@ -100,5 +109,28 @@ public class Player {
         }
         sprite.draw(canvas, drawX, drawY);
         canvas.restore();
+
+        // HP 출력
+        Paint hpPaint = new Paint();
+        hpPaint.setColor(Color.GREEN);
+        hpPaint.setTextAlign(Paint.Align.CENTER);
+        hpPaint.setTextSize(28f);
+        canvas.drawText("HP: " + this.hp, drawX + sprite.getWidth() / 2f, drawY - 25, hpPaint);
+        // HP 바 위치 계산
+        int barWidth = sprite.getWidth();
+        int barHeight = 8;
+        int barX = drawX;
+        int barY = drawY - 16; // 머리 위 여백
+
+        // 전체 바 (빨간색)
+        Paint backPaint = new Paint();
+        backPaint.setColor(Color.RED);
+        canvas.drawRect(barX, barY, barX + barWidth, barY + barHeight, backPaint);
+
+        // 남은 체력 바 (초록색)
+        //Paint hpPaint = new Paint();
+        hpPaint.setColor(Color.GREEN);
+        float ratio = (float) hp / maxHp;
+        canvas.drawRect(barX, barY, barX + (int)(barWidth * ratio), barY + barHeight, hpPaint);
     }
 }

@@ -3,8 +3,12 @@ package com.example.deadlockduel.object;
 import android.content.res.Resources;
 import android.util.Log;
 
+import java.util.List;
+
 import com.example.deadlockduel.R;
 import com.example.deadlockduel.framework.SpriteFrames;
+import com.example.deadlockduel.framework.AttackCommand;
+import com.example.deadlockduel.framework.AttackType;
 
 public class Enemy_Rogue extends Enemy {
     public Enemy_Rogue(Resources res, int blockIndex, boolean faceRight) {
@@ -12,7 +16,7 @@ public class Enemy_Rogue extends Enemy {
         this.blockIndex = blockIndex;
         this.direction = faceRight ? 1 : -1;
         this.facingRight = faceRight;
-        this.hp = 1;
+        setHp(3); // 도적 체력 3
 
         int[] resIds = {
                 R.drawable.rogue_idle_1,
@@ -24,7 +28,7 @@ public class Enemy_Rogue extends Enemy {
     }
 
     @Override
-    public void act(Player player, Enemy[] enemies) {
+    public void act(Player player, Enemy[] enemies, List<AttackCommand> attackQueue) {
         if (isDead()) return;
 
         int playerIndex = player.getBlockIndex();
@@ -48,9 +52,9 @@ public class Enemy_Rogue extends Enemy {
         }
         if (blocked) return;
 
-        if (Math.abs(dist) == 1) {
+        if (Math.abs(dist) <= 2) {
             Log.d("Enemy_Rogue", "근접 공격!");
-            // TODO: 공격 큐 등록
+            attackQueue.add(new AttackCommand(AttackType.POWER, player, false));
         }
     }
 }
