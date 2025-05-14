@@ -8,18 +8,8 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.view.MotionEvent;
 
-import com.example.deadlockduel.framework.EnemySpawnData;
-import com.example.deadlockduel.framework.Scene;
-import com.example.deadlockduel.framework.StageConfig;
-import com.example.deadlockduel.object.Block;
-import com.example.deadlockduel.object.Enemy;
-import com.example.deadlockduel.object.Enemy_Knight;
-import com.example.deadlockduel.object.Enemy_Archer;
-import com.example.deadlockduel.object.Enemy_Rogue;
-import com.example.deadlockduel.object.Player;
-import com.example.deadlockduel.framework.AttackCommand;
-import com.example.deadlockduel.framework.AttackEffect;
-import com.example.deadlockduel.framework.AttackType;
+import com.example.deadlockduel.framework.*;
+import com.example.deadlockduel.object.*;
 import com.example.deadlockduel.R;
 
 import java.util.ArrayList;
@@ -27,63 +17,20 @@ import java.util.List;
 
 public class MainScene implements Scene {
     private Bitmap background;
-    private Block[] blocks;
-    private Player player;
     private Paint blockPaint = new Paint();
-    private List<Enemy> enemies;
+    private ObjectManager objectManager;
+    private TurnProcessor turnProcessor;
+    private EffectManager effectManager;
+    private TouchInputHandler inputHandler;
     private final List<AttackCommand> attackQueue = new ArrayList<>();
-    private final List<AttackEffect> effects = new ArrayList<>();
-    private final Paint effectPaint = new Paint();
-    private int blockCount;
-
-    public Player getPlayer() {
-        return this.player;
-    }
-
-    public int getBlockCount() {
-        return blockCount;
-    }
-
-    public List<AttackEffect> getEffects() {
-        return effects;
-    }
-
-    public Rect getBlockRect(int index) {
-        return blocks[index].getRect();
-    }
 
     public MainScene(Resources res, int screenWidth, int screenHeight, StageConfig config) {
         background = BitmapFactory.decodeResource(res, config.backgroundResId);
 
-        this.blockCount = config.blockCount;
-        int gridCount = 13;
-        blocks = new Block[blockCount];
-
-        int gridWidth = screenWidth / gridCount;
-        int blockWidth = gridWidth;
-        int blockHeight = blockWidth / 5;
-        int top = (int)(screenHeight * 4f / 5f - blockHeight / 2);
-        int startIndex = (gridCount - blockCount) / 2;
-
-        for (int i = 0; i < blockCount; i++) {
-            int gridIndex = startIndex + i;
-            int left = gridIndex * gridWidth;
-            Rect rect = new Rect(left, top, left + blockWidth, top + blockHeight);
-            blocks[i] = new Block(rect);
-        }
-
-        player = new Player(res);
-        player.setBlockCount(blockCount);
-        player.reset(config.playerStartIndex, config.playerFaceRight);
-
-        enemies = new ArrayList<>();
-        for (EnemySpawnData spawn : config.enemies) {
-            Enemy enemy = createEnemyFromType(res, spawn.type, spawn.blockIndex, spawn.faceRight);
-            enemy.setBlockCount(blockCount);
-            enemy.updateBlockState(blocks);
-            enemy.updatePositionFromBlock(blocks[spawn.blockIndex].getRect());
-            enemies.add(enemy);
-        }
+        this.objectManager = new ObjectManager(res, screenWidth, screenHeight, config);
+        this.turnProcessor = new TurnProcessor(this);
+        this.effectManager = new EffectManager();
+        this.inputHandler = new TouchInputHandler(this);
 
         // 무기별 이펙트 설정
         AttackType.BASIC.effectFrames = new Bitmap[] {
@@ -111,54 +58,35 @@ public class MainScene implements Scene {
         AttackType.POWER.offsetY = -30;
     }
 
-    private Enemy createEnemyFromType(Resources res, String type, int index, boolean faceRight) {
-        switch (type) {
-            case "knight": return new Enemy_Knight(res, index, faceRight);
-            case "archer": return new Enemy_Archer(res, index, faceRight);
-            case "rogue":  return new Enemy_Rogue(res, index, faceRight);
-            default:
-                throw new IllegalArgumentException("Unknown enemy type: " + type);
-        }
-    }
-
-    @Override
     public void update() {
-        for (Block block : blocks) {
-            block.reset();
-        }
+        for (Block block : objectManager.getBlocks()) block.reset();
 
-        player.update();
-        player.updateBlockState(blocks);
-        for (Enemy enemy : enemies) {
+        objectManager.getPlayer().update();
+        objectManager.getPlayer().updateBlockState(objectManager.getBlocks());
+
+        for (Enemy enemy : objectManager.getEnemies()) {
             enemy.updateAnimation();
-            enemy.updateBlockState(blocks);
+            enemy.updateBlockState(objectManager.getBlocks());
         }
 
-        for (int i = effects.size() - 1; i >= 0; i--) {
-            AttackEffect effect = effects.get(i);
-            effect.update();
-            if (effect.isDone()) {
-                effects.remove(i);
-            }
-        }
-
+        effectManager.update();
     }
 
     public void updateEnemies() {
-        Enemy[] enemyArray = enemies.toArray(new Enemy[0]);
-        for (Enemy enemy : enemies) {
-            enemy.act(player, enemyArray, attackQueue);
-            enemy.updateBlockState(blocks);
+        Enemy[] enemyArray = objectManager.getEnemies().toArray(new Enemy[0]);
+        for (Enemy enemy : objectManager.getEnemies()) {
+            enemy.act(objectManager.getPlayer(), enemyArray, attackQueue);
+            enemy.updateBlockState(objectManager.getBlocks());
         }
     }
 
     public void performAttack(AttackType type) {
-        AttackCommand cmd = new AttackCommand(type, player, false); // perfectTiming은 일단 false로 처리
+        AttackCommand cmd = new AttackCommand(type, objectManager.getPlayer(), false);
         cmd.execute(
-                enemies.toArray(new Enemy[0]),
-                effects,
-                player,
-                blocks
+                objectManager.getEnemies().toArray(new Enemy[0]),
+                effectManager.getEffects(),
+                objectManager.getPlayer(),
+                objectManager.getBlocks()
         );
     }
 
@@ -166,10 +94,10 @@ public class MainScene implements Scene {
         if (attackQueue.isEmpty()) return;
         AttackCommand cmd = attackQueue.remove(0);
         cmd.execute(
-                enemies.toArray(new Enemy[0]),
-                effects,
-                player,
-                blocks
+                objectManager.getEnemies().toArray(new Enemy[0]),
+                effectManager.getEffects(),
+                objectManager.getPlayer(),
+                objectManager.getBlocks()
         );
     }
 
@@ -179,31 +107,41 @@ public class MainScene implements Scene {
         }
     }
 
+    public void handlePlayerTurn(AttackType type) {
+        turnProcessor.handlePlayerTurn(type);
+    }
+
     @Override
     public void draw(Canvas canvas) {
         Rect dst = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
         canvas.drawBitmap(background, null, dst, null);
 
-        for (Block block : blocks) {
-            block.draw(canvas, blockPaint);
-        }
+        for (Block block : objectManager.getBlocks()) block.draw(canvas, blockPaint);
 
-        for (Enemy enemy : enemies) {
-            Rect blockRect = blocks[enemy.getBlockIndex()].getRect();
+        for (Enemy enemy : objectManager.getEnemies()) {
+            Rect blockRect = objectManager.getBlockRect(enemy.getBlockIndex());
             enemy.updatePositionFromBlock(blockRect);
             enemy.draw(canvas);
         }
 
-        Rect playerBlockRect = blocks[player.getBlockIndex()].getRect();
+        Player player = objectManager.getPlayer();
+        Rect playerBlockRect = objectManager.getBlockRect(player.getBlockIndex());
         player.updatePositionFromBlock(playerBlockRect);
         player.draw(canvas);
 
-        for (AttackEffect effect : effects) {
-            effect.draw(canvas, effectPaint);
-        }
+        effectManager.draw(canvas);
     }
 
-    @Override public boolean onTouchEvent(MotionEvent event) { return false; }
+    public Player getPlayer() { return objectManager.getPlayer(); }
+    public int getBlockCount() { return objectManager.getBlockCount(); }
+    public List<AttackEffect> getEffects() { return effectManager.getEffects(); }
+    public Rect getBlockRect(int index) { return objectManager.getBlockRect(index); }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return inputHandler.handleTouch(event);
+    }
+
     @Override public void onEnter() { }
     @Override public void onExit() { }
     @Override public void onPause() { }
