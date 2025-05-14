@@ -1,12 +1,10 @@
-package com.example.deadlockduel.framework;
+package com.example.deadlockduel.object;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.Bitmap;
 
 public class SpriteFrames {
     private final Bitmap[] frames;

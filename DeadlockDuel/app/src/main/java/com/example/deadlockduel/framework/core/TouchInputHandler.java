@@ -1,8 +1,8 @@
-package com.example.deadlockduel.framework;
+package com.example.deadlockduel.framework.core;
 
 import android.view.MotionEvent;
 
-import com.example.deadlockduel.framework.AttackType;
+import com.example.deadlockduel.framework.battle.AttackType;
 import com.example.deadlockduel.scene.MainScene;
 
 public class TouchInputHandler {

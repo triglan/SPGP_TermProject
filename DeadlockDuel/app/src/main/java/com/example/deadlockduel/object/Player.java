@@ -8,7 +8,6 @@ import android.graphics.Rect;
 import android.util.Log;
 
 import com.example.deadlockduel.R;
-import com.example.deadlockduel.framework.SpriteFrames;
 
 public class Player {
     private final SpriteFrames sprite;

@@ -1,16 +1,10 @@
-package com.example.deadlockduel.framework;
+package com.example.deadlockduel.object;
 
 import android.content.res.Resources;
 import android.graphics.Rect;
 
-import com.example.deadlockduel.framework.EnemySpawnData;
-import com.example.deadlockduel.framework.StageConfig;
-import com.example.deadlockduel.object.Block;
-import com.example.deadlockduel.object.Enemy;
-import com.example.deadlockduel.object.Enemy_Knight;
-import com.example.deadlockduel.object.Enemy_Archer;
-import com.example.deadlockduel.object.Enemy_Rogue;
-import com.example.deadlockduel.object.Player;
+import com.example.deadlockduel.framework.data.EnemySpawnData;
+import com.example.deadlockduel.framework.data.StageConfig;
 
 import java.util.ArrayList;
 import java.util.List;

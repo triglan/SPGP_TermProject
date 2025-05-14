@@ -1,4 +1,4 @@
-package com.example.deadlockduel.framework;
+package com.example.deadlockduel.framework.core;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -6,6 +6,9 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+
+import com.example.deadlockduel.scene.SceneManager;
+import com.example.deadlockduel.scene.Scene;
 
 public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     private DrawThread drawThread;

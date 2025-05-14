@@ -1,6 +1,8 @@
-package com.example.deadlockduel.framework;
+package com.example.deadlockduel.framework.manager;
 
 import com.example.deadlockduel.R;
+import com.example.deadlockduel.framework.data.EnemySpawnData;
+import com.example.deadlockduel.framework.data.StageConfig;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -8,9 +8,19 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.view.MotionEvent;
 
-import com.example.deadlockduel.framework.*;
-import com.example.deadlockduel.object.*;
 import com.example.deadlockduel.R;
+import com.example.deadlockduel.framework.battle.AttackCommand;
+import com.example.deadlockduel.framework.battle.AttackEffect;
+import com.example.deadlockduel.framework.battle.AttackType;
+import com.example.deadlockduel.framework.battle.EffectManager;
+import com.example.deadlockduel.framework.core.TouchInputHandler;
+import com.example.deadlockduel.framework.core.TurnProcessor;
+import com.example.deadlockduel.framework.data.StageConfig;
+import com.example.deadlockduel.framework.manager.StageManager;
+import com.example.deadlockduel.object.Block;
+import com.example.deadlockduel.object.Enemy;
+import com.example.deadlockduel.object.ObjectManager;
+import com.example.deadlockduel.object.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,15 +34,31 @@ public class MainScene implements Scene {
     private TouchInputHandler inputHandler;
     private final List<AttackCommand> attackQueue = new ArrayList<>();
 
-    public MainScene(Resources res, int screenWidth, int screenHeight, StageConfig config) {
+    private final Resources res;
+    private final int screenWidth, screenHeight;
+    private final StageManager stageManager;
+    private StageConfig config;
+
+    public MainScene(Resources res, int screenWidth, int screenHeight, StageManager stageManager) {
+        this.res = res;
+        this.screenWidth = screenWidth;
+        this.screenHeight = screenHeight;
+        this.stageManager = stageManager;
+        this.config = stageManager.getCurrentStage();
+
+        initStage();
+        initEffects();
+    }
+
+    private void initStage() {
         background = BitmapFactory.decodeResource(res, config.backgroundResId);
+        objectManager = new ObjectManager(res, screenWidth, screenHeight, config);
+        turnProcessor = new TurnProcessor(this);
+        effectManager = new EffectManager();
+        inputHandler = new TouchInputHandler(this);
+    }
 
-        this.objectManager = new ObjectManager(res, screenWidth, screenHeight, config);
-        this.turnProcessor = new TurnProcessor(this);
-        this.effectManager = new EffectManager();
-        this.inputHandler = new TouchInputHandler(this);
-
-        // 무기별 이펙트 설정
+    private void initEffects() {
         AttackType.BASIC.effectFrames = new Bitmap[] {
                 BitmapFactory.decodeResource(res, R.drawable.attack_effect_melee_1),
                 BitmapFactory.decodeResource(res, R.drawable.attack_effect_melee_2),
@@ -56,6 +82,15 @@ public class MainScene implements Scene {
         };
         AttackType.POWER.effectFacesRight = true;
         AttackType.POWER.offsetY = -30;
+    }
+
+    public void goToNextStageIfAvailable() {
+        if (stageManager.hasNext()) {
+            stageManager.nextStage();
+            config = stageManager.getCurrentStage();
+            initStage();
+            initEffects(); // 이펙트도 초기화 필요할 경우
+        }
     }
 
     public void update() {
@@ -137,11 +172,7 @@ public class MainScene implements Scene {
     public List<AttackEffect> getEffects() { return effectManager.getEffects(); }
     public Rect getBlockRect(int index) { return objectManager.getBlockRect(index); }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        return inputHandler.handleTouch(event);
-    }
-
+    @Override public boolean onTouchEvent(MotionEvent event) { return inputHandler.handleTouch(event); }
     @Override public void onEnter() { }
     @Override public void onExit() { }
     @Override public void onPause() { }

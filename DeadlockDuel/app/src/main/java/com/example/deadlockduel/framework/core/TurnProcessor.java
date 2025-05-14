@@ -1,7 +1,7 @@
-package com.example.deadlockduel.framework;
+package com.example.deadlockduel.framework.core;
 
 import com.example.deadlockduel.scene.MainScene;
-import com.example.deadlockduel.framework.AttackType;
+import com.example.deadlockduel.framework.battle.AttackType;
 
 public class TurnProcessor {
     private final MainScene scene;

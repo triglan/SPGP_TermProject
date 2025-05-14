@@ -1,4 +1,4 @@
-package com.example.deadlockduel.framework;
+package com.example.deadlockduel.framework.data;
 
 public class EnemySpawnData {
     public final String type;

@@ -6,9 +6,8 @@ import android.util.Log;
 import java.util.List;
 
 import com.example.deadlockduel.R;
-import com.example.deadlockduel.framework.SpriteFrames;
-import com.example.deadlockduel.framework.AttackCommand;
-import com.example.deadlockduel.framework.AttackType;
+import com.example.deadlockduel.framework.battle.AttackCommand;
+import com.example.deadlockduel.framework.battle.AttackType;
 
 public class Enemy_Rogue extends Enemy {
     public Enemy_Rogue(Resources res, int blockIndex, boolean faceRight) {
