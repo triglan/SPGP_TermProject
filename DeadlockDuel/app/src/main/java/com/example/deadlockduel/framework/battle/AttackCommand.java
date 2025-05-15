@@ -1,7 +1,6 @@
-package com.example.deadlockduel.framework;
+package com.example.deadlockduel.framework.battle;
 
 import android.graphics.Rect;
-import android.util.Log;
 
 import com.example.deadlockduel.object.Block;
 import com.example.deadlockduel.object.Enemy;

@@ -1,4 +1,4 @@
-package com.example.deadlockduel.framework;
+package com.example.deadlockduel.framework.battle;
 
 import android.graphics.Bitmap;
 

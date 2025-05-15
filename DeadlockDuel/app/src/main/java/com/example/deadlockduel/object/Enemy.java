@@ -6,9 +6,9 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
-import com.example.deadlockduel.framework.SpriteFrames;
+
 import java.util.List;
-import com.example.deadlockduel.framework.AttackCommand;
+import com.example.deadlockduel.framework.battle.AttackCommand;
 
 public abstract class Enemy {
     protected SpriteFrames sprite;

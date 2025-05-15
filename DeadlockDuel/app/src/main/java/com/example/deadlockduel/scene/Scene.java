@@ -1,5 +1,5 @@
 // framework.scene.Scene.java
-package com.example.deadlockduel.framework;
+package com.example.deadlockduel.scene;
 
 import android.graphics.Canvas;
 import android.view.MotionEvent;
