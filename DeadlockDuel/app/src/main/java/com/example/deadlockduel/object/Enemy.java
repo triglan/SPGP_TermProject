@@ -60,8 +60,8 @@ public abstract class Enemy {
             hp = 0;
             isDead = true;
         }
-        hitFlashTimer = 6;
-        hitShakeTimer = 6;
+        hitFlashTimer = 18;
+        hitShakeTimer = 18;
     }
 
     public void updateBlockState(Block[] blocks) {
@@ -118,7 +118,7 @@ public abstract class Enemy {
         int shakeOffset = 0;
         if (hitShakeTimer > 0) {
             int shakePhase = (hitShakeTimer / 4) % 2;
-            shakeOffset = (shakePhase == 0) ? -4 : 4;
+            shakeOffset = (shakePhase == 0) ? -16 : 16;
         }
         canvas.translate(shakeOffset, 0);
 
@@ -127,16 +127,19 @@ public abstract class Enemy {
             canvas.scale(-1, 1, drawX + sprite.getWidth() / 2f, drawY + sprite.getHeight() / 2f);
         }
 
-        // ✅ 반짝임 처리
+        // ✅ 반짝임 처리 + 깜빡이는 반짝임 처리 (hitFlashTimer가 짝수일 때만 흰색 출력)
         if (hitFlashTimer > 0) {
-            Paint flashPaint = new Paint();
-            flashPaint.setColorFilter(new PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP));
-            sprite.draw(canvas, drawX, drawY, flashPaint);
+            if ((hitFlashTimer / 2) % 2 == 0) {
+                Paint flashPaint = new Paint();
+                flashPaint.setColorFilter(new PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP));
+                sprite.draw(canvas, drawX, drawY, flashPaint);
+            } else {
+                sprite.draw(canvas, drawX, drawY); // 일반 출력
+            }
             hitFlashTimer--;
         } else {
-            sprite.draw(canvas, drawX, drawY);
+            sprite.draw(canvas, drawX, drawY); // 기본 상태
         }
-
         canvas.restore();
 
         if (hitShakeTimer > 0) hitShakeTimer--;

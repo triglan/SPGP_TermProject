@@ -39,7 +39,7 @@ public class ObjectManager {
         int gridWidth = screenWidth / gridCount;
         int blockWidth = gridWidth;
         int blockHeight = blockWidth / 5;
-        int top = (int)(screenHeight * 4f / 5f - blockHeight / 2);
+        int top = (int)(screenHeight * 3f / 4f - blockHeight / 2);
         int startIndex = (gridCount - count) / 2;
 
         for (int i = 0; i < count; i++) {
