@@ -48,9 +48,9 @@ public class DeadlockDuelActivity extends AppCompatActivity {
         btnRight.setOnClickListener(v -> player.moveRight());
         btnRotate.setOnClickListener(v -> player.rotate());
 
-        btnAttack1.setOnClickListener(v -> mainScene.handlePlayerTurn(AttackType.BASIC));
-        btnAttack2.setOnClickListener(v -> mainScene.handlePlayerTurn(AttackType.LONG_RANGE));
-        btnAttack3.setOnClickListener(v -> mainScene.handlePlayerTurn(AttackType.POWER));
+        btnAttack1.setOnClickListener(v -> mainScene.handlePlayerAttack(AttackType.BASIC));
+        btnAttack2.setOnClickListener(v -> mainScene.handlePlayerAttack(AttackType.LONG_RANGE));
+        btnAttack3.setOnClickListener(v -> mainScene.handlePlayerAttack(AttackType.POWER));
 
         Log.d("DeadlockDuelActivity", "MainScene initialized");
     }

@@ -23,7 +23,7 @@ public class TouchInputHandler {
         } else if (x < screenWidth * 2f / 3f) {
             scene.getPlayer().moveRight();  // 오른쪽으로 이동
         } else {
-            scene.handlePlayerTurn(AttackType.BASIC); // 공격
+            scene.handlePlayerAttack(AttackType.BASIC); // 공격
         }
 
         return true;

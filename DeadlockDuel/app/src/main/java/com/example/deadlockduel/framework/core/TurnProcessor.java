@@ -10,11 +10,11 @@ public class TurnProcessor {
         this.scene = scene;
     }
 
-    public void handlePlayerTurn(AttackType type) {
-        scene.performAttack(type);
-        scene.executeAllAttacks();
 
-        scene.updateEnemies();
-        scene.executeAllAttacks();
+    public void advanceTurn() {
+        scene.incrementTurnCount();   // turnCount++
+        scene.updateEnemies();        // 적 행동
+        scene.executeAllAttacks();    // 적 공격 or 기타 효과
     }
+
 }

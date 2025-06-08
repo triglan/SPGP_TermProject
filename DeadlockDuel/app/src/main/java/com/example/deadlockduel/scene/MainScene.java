@@ -144,12 +144,28 @@ public class MainScene implements Scene {
             executeNextAttack();
         }
     }
-
-    public void handlePlayerTurn(AttackType type) {
-        turnProcessor.handlePlayerTurn(type);
-        turnCount++;
+    public void handlePlayerMoveLeft() {
+        objectManager.getPlayer().moveLeft();
+        turnProcessor.advanceTurn();
     }
 
+    public void handlePlayerMoveRight() {
+        objectManager.getPlayer().moveRight();
+        turnProcessor.advanceTurn();
+    }
+
+    public void handlePlayerRotate() {
+        objectManager.getPlayer().rotate();
+        turnProcessor.advanceTurn();
+    }
+
+    public void handlePlayerAttack(AttackType type) {
+        performAttack(type);          // 공격 실행은 MainScene에서 계속 처리
+        turnProcessor.advanceTurn(); // 턴 처리 및 적 행동은 위임
+    }
+    public void incrementTurnCount() {
+        turnCount++;
+    }
     @Override
     public void draw(Canvas canvas) {
         Rect dst = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
