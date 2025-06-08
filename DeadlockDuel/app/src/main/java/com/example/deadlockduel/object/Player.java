@@ -18,7 +18,7 @@ public class Player {
     private boolean facingRight = true;
     private int frameTick = 0;
     private final int frameInterval = 8;
-    private int hp = 5, maxHp = 10;
+    private int hp = 10, maxHp = 10;
 
     private int blockCount;
 
