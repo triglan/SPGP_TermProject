@@ -4,6 +4,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.view.MotionEvent;
@@ -38,6 +39,8 @@ public class MainScene implements Scene {
     private final int screenWidth, screenHeight;
     private final StageManager stageManager;
     private StageConfig config;
+    private int turnCount = 1;
+
 
     public MainScene(Resources res, int screenWidth, int screenHeight, StageManager stageManager) {
         this.res = res;
@@ -144,6 +147,7 @@ public class MainScene implements Scene {
 
     public void handlePlayerTurn(AttackType type) {
         turnProcessor.handlePlayerTurn(type);
+        turnCount++;
     }
 
     @Override
@@ -165,6 +169,15 @@ public class MainScene implements Scene {
         player.draw(canvas);
 
         effectManager.draw(canvas);
+
+        // 턴 관리
+        Paint turnPaint = new Paint();
+        turnPaint.setColor(Color.WHITE);
+        turnPaint.setTextSize(64);
+        turnPaint.setTextAlign(Paint.Align.CENTER);
+
+        canvas.drawText("Turn: " + turnCount, screenWidth / 2f, 100, turnPaint);
+
     }
 
     public Player getPlayer() { return objectManager.getPlayer(); }
