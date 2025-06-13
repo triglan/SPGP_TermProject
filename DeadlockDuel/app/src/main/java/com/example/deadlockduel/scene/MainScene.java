@@ -40,7 +40,10 @@ public class MainScene implements Scene {
     private final StageManager stageManager;
     private StageConfig config;
     private int turnCount = 1;
-
+    // 턴 애니메이션
+    private long turnAnimStartTime = -1;
+    private final long TURN_ANIM_DURATION = 1000; // milliseconds
+    private boolean turnAnimActive = false;
 
     public MainScene(Resources res, int screenWidth, int screenHeight, StageManager stageManager) {
         this.res = res;
@@ -139,6 +142,8 @@ public class MainScene implements Scene {
         );
     }
 
+
+
     public void executeAllAttacks() {
         while (!attackQueue.isEmpty()) {
             executeNextAttack();
@@ -165,6 +170,8 @@ public class MainScene implements Scene {
     }
     public void incrementTurnCount() {
         turnCount++;
+        turnAnimStartTime = System.currentTimeMillis();
+        turnAnimActive = true;
     }
     @Override
     public void draw(Canvas canvas) {
@@ -186,13 +193,38 @@ public class MainScene implements Scene {
 
         effectManager.draw(canvas);
 
-        // 턴 관리
-        Paint turnPaint = new Paint();
-        turnPaint.setColor(Color.WHITE);
-        turnPaint.setTextSize(64);
-        turnPaint.setTextAlign(Paint.Align.CENTER);
+        if (turnAnimActive) {
+            long elapsed = System.currentTimeMillis() - turnAnimStartTime;
+            if (elapsed > TURN_ANIM_DURATION) {
+                turnAnimActive = false;
+            } else {
+                float progress = elapsed / (float) TURN_ANIM_DURATION;
 
-        canvas.drawText("Turn: " + turnCount, screenWidth / 2f, 100, turnPaint);
+                float scale = 1.5f - 0.5f * progress;
+
+                // 색상 직접 보간: YELLOW → WHITE
+                int r = (int)(Color.red(Color.YELLOW) * (1 - progress) + Color.red(Color.WHITE) * progress);
+                int g = (int)(Color.green(Color.YELLOW) * (1 - progress) + Color.green(Color.WHITE) * progress);
+                int b = (int)(Color.blue(Color.YELLOW) * (1 - progress) + Color.blue(Color.WHITE) * progress);
+                int blendedColor = Color.rgb(r, g, b);
+
+                Paint turnPaint = new Paint();
+                turnPaint.setColor(blendedColor);
+                turnPaint.setTextSize(64 * scale);
+                turnPaint.setTextAlign(Paint.Align.CENTER);
+
+                canvas.drawText("Turn: " + turnCount, screenWidth / 2f, 100, turnPaint);
+            }
+        } else {
+            Paint turnPaint = new Paint();
+            turnPaint.setColor(Color.WHITE);
+            turnPaint.setTextSize(64);
+            turnPaint.setTextAlign(Paint.Align.CENTER);
+
+            canvas.drawText("Turn: " + turnCount, screenWidth / 2f, 100, turnPaint);
+        }
+
+
 
     }
 

@@ -44,9 +44,12 @@ public class DeadlockDuelActivity extends AppCompatActivity {
         ImageButton btnAttack2 = findViewById(R.id.btnAttack2);
         ImageButton btnAttack3 = findViewById(R.id.btnAttack3);
 
-        btnLeft.setOnClickListener(v -> player.moveLeft());
-        btnRight.setOnClickListener(v -> player.moveRight());
-        btnRotate.setOnClickListener(v -> player.rotate());
+//        btnLeft.setOnClickListener(v -> player.moveLeft());
+//        btnRight.setOnClickListener(v -> player.moveRight());
+//        btnRotate.setOnClickListener(v -> player.rotate());
+        btnLeft.setOnClickListener(v -> mainScene.handlePlayerMoveLeft());     // ✅ 변경
+        btnRight.setOnClickListener(v -> mainScene.handlePlayerMoveRight());   // ✅ 변경
+        btnRotate.setOnClickListener(v -> mainScene.handlePlayerRotate());     // ✅ 변경
 
         btnAttack1.setOnClickListener(v -> mainScene.handlePlayerAttack(AttackType.BASIC));
         btnAttack2.setOnClickListener(v -> mainScene.handlePlayerAttack(AttackType.LONG_RANGE));

@@ -13,6 +13,7 @@ public class AttackCommand {
     public final Player player;
     public final boolean perfectTiming;
 
+
     public AttackCommand(AttackType type, Player player, boolean perfectTiming) {
         this.type = type;
         this.player = player;
