@@ -68,11 +68,11 @@
             android:scaleType="fitCenter"
             android:contentDescription="공격3" />
 
-<!--        <Button-->
-<!--            android:id="@+id/btnAttackExecute"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="Attack" />-->
+        <Button
+            android:id="@+id/btnAttackExecute"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Attack" />
 
         <Button
             android:id="@+id/btnRight"

@@ -8,6 +8,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.view.MotionEvent;
+import android.widget.Button;
+import android.widget.ImageButton;
 
 import com.example.deadlockduel.R;
 import com.example.deadlockduel.framework.battle.AttackCommand;
@@ -33,7 +35,6 @@ public class MainScene implements Scene {
     private TurnProcessor turnProcessor;
     private EffectManager effectManager;
     private TouchInputHandler inputHandler;
-    private final List<AttackCommand> attackQueue = new ArrayList<>();
 
     private final Resources res;
     private final int screenWidth, screenHeight;
@@ -90,14 +91,14 @@ public class MainScene implements Scene {
         AttackType.POWER.offsetY = -30;
     }
 
-    public void goToNextStageIfAvailable() {
-        if (stageManager.hasNext()) {
-            stageManager.nextStage();
-            config = stageManager.getCurrentStage();
-            initStage();
-            initEffects(); // 이펙트도 초기화 필요할 경우
-        }
-    }
+//    public void goToNextStageIfAvailable() {
+//        if (stageManager.hasNext()) {
+//            stageManager.nextStage();
+//            config = stageManager.getCurrentStage();
+//            initStage();
+//            initEffects(); // 이펙트도 초기화 필요할 경우
+//        }
+//    }
 
     public void update() {
         for (Block block : objectManager.getBlocks()) block.reset();
@@ -114,41 +115,34 @@ public class MainScene implements Scene {
     }
 
     public void updateEnemies() {
-        Enemy[] enemyArray = objectManager.getEnemies().toArray(new Enemy[0]);
-        for (Enemy enemy : objectManager.getEnemies()) {
-            enemy.act(objectManager.getPlayer(), enemyArray, attackQueue);
-            enemy.updateBlockState(objectManager.getBlocks());
+        objectManager.updateEnemies();
+    }
+
+    public TurnProcessor getTurnProcessor() {
+        return turnProcessor;
+    }
+    public void enqueueAttackFromButton(int weaponIndex) {
+        if (getPlayer().tryEnqueueAttack(weaponIndex, false)) {
+            getTurnProcessor().advanceTurn();
+        }
+    }
+    public void executeAttackFromButton() {
+        executePlayerAttack();
+        getTurnProcessor().advanceTurn();
+    }
+    public void executePlayerAttack() {
+        Player player = getPlayer();
+        if (player.hasPendingAttack()) {
+            player.executeNextAttack(getEnemies(), effectManager.getEffects(), getBlocks());
         }
     }
 
-    public void performAttack(AttackType type) {
-        AttackCommand cmd = new AttackCommand(type, objectManager.getPlayer(), false);
-        cmd.execute(
-                objectManager.getEnemies().toArray(new Enemy[0]),
-                effectManager.getEffects(),
-                objectManager.getPlayer(),
-                objectManager.getBlocks()
-        );
-    }
 
-    public void executeNextAttack() {
-        if (attackQueue.isEmpty()) return;
-        AttackCommand cmd = attackQueue.remove(0);
-        cmd.execute(
-                objectManager.getEnemies().toArray(new Enemy[0]),
-                effectManager.getEffects(),
-                objectManager.getPlayer(),
-                objectManager.getBlocks()
-        );
-    }
-
-
-
-    public void executeAllAttacks() {
-        while (!attackQueue.isEmpty()) {
-            executeNextAttack();
-        }
-    }
+    //    public void executeAllAttacks() {
+//        while (!attackQueue.isEmpty()) {
+//            executeNextAttack();
+//        }
+//    }
     public void handlePlayerMoveLeft() {
         objectManager.getPlayer().moveLeft();
         turnProcessor.advanceTurn();
@@ -164,10 +158,6 @@ public class MainScene implements Scene {
         turnProcessor.advanceTurn();
     }
 
-    public void handlePlayerAttack(AttackType type) {
-        performAttack(type);          // 공격 실행은 MainScene에서 계속 처리
-        turnProcessor.advanceTurn(); // 턴 처리 및 적 행동은 위임
-    }
     public void incrementTurnCount() {
         turnCount++;
         turnAnimStartTime = System.currentTimeMillis();
@@ -229,8 +219,6 @@ public class MainScene implements Scene {
     }
 
     public Player getPlayer() { return objectManager.getPlayer(); }
-    public int getBlockCount() { return objectManager.getBlockCount(); }
-    public List<AttackEffect> getEffects() { return effectManager.getEffects(); }
     public Rect getBlockRect(int index) { return objectManager.getBlockRect(index); }
 
     @Override public boolean onTouchEvent(MotionEvent event) { return inputHandler.handleTouch(event); }

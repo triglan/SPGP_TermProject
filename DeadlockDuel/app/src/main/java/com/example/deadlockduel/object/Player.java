@@ -8,6 +8,13 @@ import android.graphics.Rect;
 import android.util.Log;
 
 import com.example.deadlockduel.R;
+import com.example.deadlockduel.framework.battle.AttackCommand;
+import com.example.deadlockduel.framework.battle.AttackEffect;
+import com.example.deadlockduel.framework.battle.AttackType;
+
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.List;
 
 public class Player {
     private final SpriteFrames sprite;
@@ -22,6 +29,11 @@ public class Player {
 
     private int blockCount;
 
+    // 공격 대기열 및 쿨타임 관련
+    private final Queue<AttackCommand> attackQueue = new LinkedList<>();
+    private final int[] weaponCooldowns = new int[] {3, 3, 3};
+    private final int[] weaponCooldownMax = new int[] {2, 3, 3};
+
     public Player(Resources res) {
         int[] resIds = {
                 R.drawable.player_idle_1,
@@ -32,23 +44,10 @@ public class Player {
         sprite = new SpriteFrames(res, resIds, 1.0f, 0, 0);
     }
 
-    public void setBlockCount(int count) {
-        this.blockCount = count;
-    }
-
-    public void setBlockIndex(int index) {
-        this.blockIndex = index;
-    }
-
-    public int getBlockIndex() {
-        return blockIndex;
-    }
-
-    public int getDirection() {
-        return direction;
-    }
-
-
+    public void setBlockCount(int count) { this.blockCount = count; }
+    public void setBlockIndex(int index) { this.blockIndex = index; }
+    public int getBlockIndex() { return blockIndex; }
+    public int getDirection() { return direction; }
 
     public void updateBlockState(Block[] blocks) {
         for (int i = 0; i < blocks.length; i++) {
@@ -67,8 +66,6 @@ public class Player {
         if (blockIndex > 0) {
             blockIndex--;
             Log.d("Player", "← 이동: blockIndex = " + blockIndex);
-        } else {
-            Log.d("Player", "왼쪽 끝이라 이동 불가");
         }
     }
 
@@ -76,8 +73,6 @@ public class Player {
         if (blockIndex < blockCount - 1) {
             blockIndex++;
             Log.d("Player", "→ 이동: blockIndex = " + blockIndex);
-        } else {
-            Log.d("Player", "오른쪽 끝이라 이동 불가");
         }
     }
 
@@ -109,27 +104,62 @@ public class Player {
         sprite.draw(canvas, drawX, drawY);
         canvas.restore();
 
-        // HP 출력
+        // HP 및 체력바
         Paint hpPaint = new Paint();
         hpPaint.setColor(Color.GREEN);
         hpPaint.setTextAlign(Paint.Align.CENTER);
         hpPaint.setTextSize(28f);
         canvas.drawText("HP: " + this.hp, drawX + sprite.getWidth() / 2f, drawY - 25, hpPaint);
-        // HP 바 위치 계산
+
         int barWidth = sprite.getWidth();
         int barHeight = 8;
         int barX = drawX;
-        int barY = drawY - 16; // 머리 위 여백
+        int barY = drawY - 16;
 
-        // 전체 바 (빨간색)
         Paint backPaint = new Paint();
         backPaint.setColor(Color.RED);
         canvas.drawRect(barX, barY, barX + barWidth, barY + barHeight, backPaint);
 
-        // 남은 체력 바 (초록색)
-        //Paint hpPaint = new Paint();
         hpPaint.setColor(Color.GREEN);
         float ratio = (float) hp / maxHp;
         canvas.drawRect(barX, barY, barX + (int)(barWidth * ratio), barY + barHeight, hpPaint);
+    }
+
+    // ✅ 공격 대기열 관련
+    public boolean tryEnqueueAttack(int weaponIndex, boolean perfectTiming) {
+        if (weaponCooldowns[weaponIndex] < weaponCooldownMax[weaponIndex]) {
+            return false; // 쿨타임 중
+        }
+        AttackType type = AttackType.getByIndex(weaponIndex);
+        AttackCommand command = new AttackCommand(type, this, perfectTiming);
+        attackQueue.offer(command);
+        weaponCooldowns[weaponIndex] = 0;
+        return true;
+    }
+
+    public void executeNextAttack(Enemy[] enemies, List<AttackEffect> effects, Block[] blocks) {
+        if (attackQueue.isEmpty()) return;
+        AttackCommand command = attackQueue.poll();
+        command.execute(enemies, effects, this, blocks);
+    }
+
+    public void advanceCooldowns() {
+        for (int i = 0; i < weaponCooldowns.length; i++) {
+            if (weaponCooldowns[i] < weaponCooldownMax[i]) {
+                weaponCooldowns[i]++;
+            }
+        }
+    }
+
+    public int getCooldown(int weaponIndex) {
+        return weaponCooldowns[weaponIndex];
+    }
+
+    public int getCooldownMax(int weaponIndex) {
+        return weaponCooldownMax[weaponIndex];
+    }
+
+    public boolean hasPendingAttack() {
+        return !attackQueue.isEmpty();
     }
 }

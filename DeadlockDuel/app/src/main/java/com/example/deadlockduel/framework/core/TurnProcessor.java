@@ -12,9 +12,9 @@ public class TurnProcessor {
 
 
     public void advanceTurn() {
-        scene.incrementTurnCount();   // turnCount++
-        scene.updateEnemies();        // 적 행동
-        scene.executeAllAttacks();    // 적 공격 or 기타 효과
+        scene.incrementTurnCount();
+        scene.updateEnemies();
+        scene.getPlayer().advanceCooldowns();
     }
 
 }

@@ -3,15 +3,14 @@ package com.example.deadlockduel.framework.battle;
 import android.graphics.Bitmap;
 
 public enum AttackType {
-    BASIC(1, 1, 0),
-    LONG_RANGE(1, 2, 1),
-    POWER(2, 2, 2);
+    BASIC(3, 1, 2),
+    LONG_RANGE(1, 99, 3),
+    POWER(2, 2, 3);
 
     public final int power;
     public final int range;
     public final int cooldown;
 
-    // 💥 이펙트 리소스 관련 속성들
     public Bitmap[] effectFrames;
     public boolean effectFacesRight;
     public int offsetY;
@@ -20,5 +19,9 @@ public enum AttackType {
         this.power = power;
         this.range = range;
         this.cooldown = cooldown;
+    }
+
+    public static AttackType getByIndex(int index) {
+        return values()[index];
     }
 }
