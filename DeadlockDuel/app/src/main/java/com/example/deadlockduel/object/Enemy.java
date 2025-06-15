@@ -81,6 +81,12 @@ public abstract class Enemy {
         hit(damage);
     }
 
+    public void setDirection(int dir) {
+        this.direction = dir;
+        this.facingRight = (dir == 1);
+    }
+
+
     public void updateBlockState(Block[] blocks) {
         if (blockIndex >= 0 && blockIndex < blocks.length) {
             blocks[blockIndex].setHasEnemy(!isDead);

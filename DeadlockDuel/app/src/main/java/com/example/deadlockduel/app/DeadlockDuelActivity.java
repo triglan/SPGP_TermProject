@@ -7,15 +7,11 @@ import android.widget.ImageButton;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.deadlockduel.R;
-import com.example.deadlockduel.framework.battle.AttackType;
 import com.example.deadlockduel.framework.core.GameView;
 import com.example.deadlockduel.framework.manager.StageManager;
-import com.example.deadlockduel.object.Player;
 import com.example.deadlockduel.scene.MainScene;
 
 public class DeadlockDuelActivity extends AppCompatActivity {
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,38 +20,36 @@ public class DeadlockDuelActivity extends AppCompatActivity {
 
         GameView gameView = findViewById(R.id.gameView);
 
-        // ✅ StageManager 생성
+        // StageManager 및 MainScene 생성
         StageManager stageManager = new StageManager();
-
-        // ✅ MainScene 생성 시 StageManager 넘김
         MainScene mainScene = new MainScene(
                 getResources(),
                 getWindowManager().getDefaultDisplay().getWidth(),
                 getWindowManager().getDefaultDisplay().getHeight(),
-                stageManager,
-                DeadlockDuelActivity.this
+                stageManager
         );
         gameView.setInitialScene(mainScene);
 
-        Player player = mainScene.getPlayer();
-
+        // 버튼 연결
         Button btnLeft = findViewById(R.id.btnLeft);
         Button btnRight = findViewById(R.id.btnRight);
         Button btnRotate = findViewById(R.id.btnRotate);
         ImageButton btnAttack1 = findViewById(R.id.btnAttack1);
         ImageButton btnAttack2 = findViewById(R.id.btnAttack2);
         ImageButton btnAttack3 = findViewById(R.id.btnAttack3);
+        Button btnExecute = findViewById(R.id.btnAttackExecute);  // XML에서 주석 해제 필수
 
+        // 이동, 회전 처리
         btnLeft.setOnClickListener(v -> mainScene.handlePlayerMoveLeft());
         btnRight.setOnClickListener(v -> mainScene.handlePlayerMoveRight());
         btnRotate.setOnClickListener(v -> mainScene.handlePlayerRotate());
 
-        btnAttack1.setOnClickListener(v -> mainScene.handlePlayerAttack(AttackType.MELEE));
-        btnAttack2.setOnClickListener(v -> mainScene.handlePlayerAttack(AttackType.LONG_RANGE));
-        btnAttack3.setOnClickListener(v -> mainScene.handlePlayerAttack(AttackType.POWER));
+        // 공격 대기열에 추가 (무기 0, 1, 2번)
+        btnAttack1.setOnClickListener(v -> mainScene.enqueueAttackFromButton(0));
+        btnAttack2.setOnClickListener(v -> mainScene.enqueueAttackFromButton(1));
+        btnAttack3.setOnClickListener(v -> mainScene.enqueueAttackFromButton(2));
 
-        Button btnAttackExecute = findViewById(R.id.btnAttackExecute);
-        btnAttackExecute.setOnClickListener(v -> mainScene.handlePlayerExecuteAttack());
-
+        // 공격 큐 실행
+        btnExecute.setOnClickListener(v -> mainScene.executeAttackFromButton());
     }
 }

@@ -1,7 +1,5 @@
 package com.example.deadlockduel.scene;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,16 +8,14 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.view.MotionEvent;
-import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.ImageButton;
 
 import com.example.deadlockduel.R;
 import com.example.deadlockduel.framework.battle.AttackCommand;
 import com.example.deadlockduel.framework.battle.AttackEffect;
 import com.example.deadlockduel.framework.battle.AttackType;
 import com.example.deadlockduel.framework.battle.EffectManager;
-import com.example.deadlockduel.framework.core.BlockRectProvider;
 import com.example.deadlockduel.framework.core.TouchInputHandler;
 import com.example.deadlockduel.framework.core.TurnProcessor;
 import com.example.deadlockduel.framework.data.StageConfig;
@@ -32,14 +28,13 @@ import com.example.deadlockduel.object.Player;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainScene implements Scene, BlockRectProvider {
+public class MainScene implements Scene {
     private Bitmap background;
     private Paint blockPaint = new Paint();
     private ObjectManager objectManager;
     private TurnProcessor turnProcessor;
     private EffectManager effectManager;
     private TouchInputHandler inputHandler;
-    private final List<AttackCommand> attackQueue = new ArrayList<>();
 
     private final Resources res;
     private final int screenWidth, screenHeight;
@@ -50,17 +45,13 @@ public class MainScene implements Scene, BlockRectProvider {
     private long turnAnimStartTime = -1;
     private final long TURN_ANIM_DURATION = 1000; // milliseconds
     private boolean turnAnimActive = false;
-    private final Context context;
-    private Button retryButton;
-    private boolean isGameOver = false;
 
-    public MainScene(Resources res, int screenWidth, int screenHeight, StageManager stageManager, Context context) {
+    public MainScene(Resources res, int screenWidth, int screenHeight, StageManager stageManager) {
         this.res = res;
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
         this.stageManager = stageManager;
         this.config = stageManager.getCurrentStage();
-        this.context = context;
 
         initStage();
         initEffects();
@@ -70,27 +61,19 @@ public class MainScene implements Scene, BlockRectProvider {
         background = BitmapFactory.decodeResource(res, config.backgroundResId);
         objectManager = new ObjectManager(res, screenWidth, screenHeight, config);
         turnProcessor = new TurnProcessor(this);
-        effectManager = EffectManager.getInstance();
+        effectManager = new EffectManager();
         inputHandler = new TouchInputHandler(this);
-        objectManager.getPlayer().setBlockRectProvider(this);
-        AttackCommand.blockRectProvider = this;
     }
-
-    @Override
-    public Block[] getAllBlocks() {
-        return objectManager.getBlocks();
-    }
-
 
     private void initEffects() {
-        AttackType.MELEE.effectFrames = new Bitmap[] {
+        AttackType.BASIC.effectFrames = new Bitmap[] {
                 BitmapFactory.decodeResource(res, R.drawable.attack_effect_melee_1),
                 BitmapFactory.decodeResource(res, R.drawable.attack_effect_melee_2),
                 BitmapFactory.decodeResource(res, R.drawable.attack_effect_melee_3),
                 BitmapFactory.decodeResource(res, R.drawable.attack_effect_melee_4)
         };
-        AttackType.MELEE.effectFacesRight = true;
-        AttackType.MELEE.offsetY = -40;
+        AttackType.BASIC.effectFacesRight = true;
+        AttackType.BASIC.offsetY = -40;
 
         AttackType.LONG_RANGE.effectFrames = new Bitmap[] {
                 BitmapFactory.decodeResource(res, R.drawable.attack_effect_range_1),
@@ -108,11 +91,19 @@ public class MainScene implements Scene, BlockRectProvider {
         AttackType.POWER.offsetY = -30;
     }
 
+//    public void goToNextStageIfAvailable() {
+//        if (stageManager.hasNext()) {
+//            stageManager.nextStage();
+//            config = stageManager.getCurrentStage();
+//            initStage();
+//            initEffects(); // 이펙트도 초기화 필요할 경우
+//        }
+//    }
 
     public void update() {
         for (Block block : objectManager.getBlocks()) block.reset();
 
-        objectManager.getPlayer().update(objectManager.getEnemies());
+        objectManager.getPlayer().update();
         objectManager.getPlayer().updateBlockState(objectManager.getBlocks());
 
         for (Enemy enemy : objectManager.getEnemies()) {
@@ -124,35 +115,34 @@ public class MainScene implements Scene, BlockRectProvider {
     }
 
     public void updateEnemies() {
-        Enemy[] enemyArray = objectManager.getEnemies().toArray(new Enemy[0]);
-        for (Enemy enemy : objectManager.getEnemies()) {
-            enemy.act(objectManager.getPlayer(), enemyArray, attackQueue);
-            enemy.updateBlockState(objectManager.getBlocks());
+        objectManager.updateEnemies();
+    }
+
+    public TurnProcessor getTurnProcessor() {
+        return turnProcessor;
+    }
+    public void enqueueAttackFromButton(int weaponIndex) {
+        if (getPlayer().tryEnqueueAttack(weaponIndex, false)) {
+            getTurnProcessor().advanceTurn();
+        }
+    }
+    public void executeAttackFromButton() {
+        executePlayerAttack();
+        getTurnProcessor().advanceTurn();
+    }
+    public void executePlayerAttack() {
+        Player player = getPlayer();
+        if (player.hasPendingAttack()) {
+            player.executeNextAttack(getEnemies(), effectManager.getEffects(), getBlocks());
         }
     }
 
-    public void executeEnemyAttacks() {
-        for (AttackCommand cmd : attackQueue) {
-            cmd.execute();  // ✅ 인자 없이 호출
-        }
-        attackQueue.clear();
-    }
 
-
-
-    public void handlePlayerExecuteAttack() {
-        objectManager.getPlayer().startAttackQueue();
-        updateCooldownUI();
-    }
-    public void updateCooldownUI() {
-        int[] cd = objectManager.getPlayer().getWeaponCooldowns();
-        int[] max = objectManager.getPlayer().getMaxCooldowns();
-
-        ((TextView) ((Activity) context).findViewById(R.id.textCooldown1)).setText(cd[0] + "/" + max[0]);
-        ((TextView) ((Activity) context).findViewById(R.id.textCooldown2)).setText(cd[1] + "/" + max[1]);
-        ((TextView) ((Activity) context).findViewById(R.id.textCooldown3)).setText(cd[2] + "/" + max[2]);
-    }
-
+    //    public void executeAllAttacks() {
+//        while (!attackQueue.isEmpty()) {
+//            executeNextAttack();
+//        }
+//    }
     public void handlePlayerMoveLeft() {
         objectManager.getPlayer().moveLeft();
         turnProcessor.advanceTurn();
@@ -165,11 +155,6 @@ public class MainScene implements Scene, BlockRectProvider {
 
     public void handlePlayerRotate() {
         objectManager.getPlayer().rotate();
-        turnProcessor.advanceTurn();
-    }
-
-    public void handlePlayerAttack(AttackType type) {
-        objectManager.getPlayer().tryAddAttack(type.ordinal(), System.currentTimeMillis());
         turnProcessor.advanceTurn();
     }
 
