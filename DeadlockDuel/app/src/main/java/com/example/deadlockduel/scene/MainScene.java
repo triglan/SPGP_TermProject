@@ -9,6 +9,10 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.media.MediaPlayer;
+import android.media.SoundPool;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -29,6 +33,9 @@ import com.example.deadlockduel.object.Enemy;
 import com.example.deadlockduel.object.ObjectManager;
 import com.example.deadlockduel.object.Player;
 import com.example.deadlockduel.scene.SceneManager;
+import android.graphics.Typeface;
+import android.view.Gravity;
+import android.widget.FrameLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +62,10 @@ public class MainScene implements Scene, BlockRectProvider {
     private android.widget.Button retryButton;
     private boolean isGameOver = false;
     private boolean isStageClear = false;
+    private SoundPool soundPool;
+    private int meleeSoundId, rangeSoundId, powerSoundId;
+
+    private MediaPlayer bgmPlayer;
 
     public MainScene(Resources res, int screenWidth, int screenHeight, StageManager stageManager, Context context) {
         this.res = res;
@@ -65,9 +76,31 @@ public class MainScene implements Scene, BlockRectProvider {
         this.context = context;
 
         initStage();
+        effectManager.setScene(this);
         initEffects();
+        initSound();
         initRetryButton();
     }
+    private void initSound() {
+        soundPool = new SoundPool.Builder().setMaxStreams(4).build();
+        meleeSoundId = soundPool.load(context, R.raw.attack_melee_sound, 1);
+        rangeSoundId = soundPool.load(context, R.raw.attack_range_sound, 1);
+        powerSoundId = soundPool.load(context, R.raw.attack_power_sound, 1);
+    }
+    private void playBgm(Integer resId, boolean loop) {
+        if (bgmPlayer != null) {
+            bgmPlayer.stop();
+            bgmPlayer.release();
+            bgmPlayer = null;
+        }
+
+        if (resId != null) {
+            bgmPlayer = MediaPlayer.create(context, resId);
+            bgmPlayer.setLooping(loop);
+            bgmPlayer.start();
+        }
+    }
+
 
     private void initRetryButton() {
         retryButton = new android.widget.Button(context);
@@ -113,6 +146,20 @@ public class MainScene implements Scene, BlockRectProvider {
         inputHandler = new TouchInputHandler(this);
         objectManager.getPlayer().setBlockRectProvider(this);
         AttackCommand.blockRectProvider = this;
+        playStageBgm();
+    }
+    private void playStageBgm() {
+        int stage = stageManager.getCurrentStageNumber();
+        switch (stage) {
+            case 1:
+                playBgm(R.raw.stage1_bgm, true); break;
+            case 2:
+                playBgm(R.raw.stage2_bgm, true); break;
+            case 3:
+                playBgm(R.raw.stage3_bgm, true); break;
+            default:
+                playBgm(null, false); // fallback 또는 무음
+        }
     }
 
     @Override
@@ -157,6 +204,7 @@ public class MainScene implements Scene, BlockRectProvider {
 
         if (!isGameOver && player.isDead()) {
             isGameOver = true;
+            playBgm(R.raw.gameover, true);
             ((Activity) context).runOnUiThread(() -> {
                 retryButton.setVisibility(View.VISIBLE);
             });
@@ -188,22 +236,48 @@ public class MainScene implements Scene, BlockRectProvider {
     }
     private void onStageClear() {
         if (stageManager.hasNext()) {
-            stageManager.nextStage();  // 다음 스테이지로 인덱스 증가
-            config = stageManager.getCurrentStage(); // 새로운 스테이지 정보 갱신
+            // 클리어 텍스트 UI
+            TextView clearText = new TextView(context);
+            clearText.setText("CLEAR!");
+            clearText.setTextSize(48);
+            clearText.setTextColor(Color.YELLOW);
+            clearText.setTypeface(Typeface.DEFAULT_BOLD);
+            clearText.setGravity(Gravity.CENTER);
 
-            initStage();   // 맵, 플레이어, 적 초기화
-            initEffects(); // 이펙트 초기화
-            updateCooldownUI(); // UI도 초기화
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    FrameLayout.LayoutParams.WRAP_CONTENT
+            );
+            params.gravity = Gravity.CENTER;
 
-            isStageClear = false;
-            isGameOver = false;
+            ((Activity) context).runOnUiThread(() -> {
+                ((Activity) context).addContentView(clearText, params);
+                playBgm(R.raw.clear, false); // 클리어 BGM 재생 (loop = false)
+            });
+
+            // 3초 후 다음 스테이지로 전환
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                stageManager.nextStage();  // 다음 스테이지로 인덱스 증가
+                config = stageManager.getCurrentStage(); // 새로운 스테이지 정보 갱신
+
+                initStage();   // 맵, 플레이어, 적 초기화
+                initEffects(); // 이펙트 초기화
+                updateCooldownUI(); // UI도 초기화
+
+                playBgm(null, false); // BGM 정지
+                isStageClear = false;
+                isGameOver = false;
+            }, 3000);
         } else {
-            // 마지막 스테이지 클리어 시 처리 (예: 엔딩 화면 or Retry)
+            // 마지막 스테이지 클리어 시 처리
             ((Activity) context).runOnUiThread(() -> {
                 retryButton.setVisibility(View.VISIBLE);
+                playBgm(R.raw.clear, false);
             });
         }
     }
+
+
 
     public void updateEnemies() {
         Enemy[] enemyArray = objectManager.getEnemies().toArray(new Enemy[0]);
@@ -220,6 +294,19 @@ public class MainScene implements Scene, BlockRectProvider {
         attackQueue.clear();
     }
 
+    public void playEffectSound(AttackType type) {
+        switch (type) {
+            case MELEE:
+                soundPool.play(meleeSoundId, 1, 1, 1, 0, 0.5f);
+                break;
+            case LONG_RANGE:
+                soundPool.play(rangeSoundId, 1, 1, 1, 0, 0.5f);
+                break;
+            case POWER:
+                soundPool.play(powerSoundId, 1, 1, 1, 0, 0.5f);
+                break;
+        }
+    }
 
 
     public void handlePlayerExecuteAttack() {

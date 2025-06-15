@@ -51,9 +51,8 @@ public class EnemyAttackCommand extends AttackCommand {
             int x = rect.centerX() - frames[0].getWidth() / 2;
             int y = rect.centerY() - frames[0].getHeight() / 2 + offsetY;
 
-            EffectManager.getInstance().addEffect(
-                    new AttackEffect(frames, x, y, faceRight, scale)
-            );
+            EffectManager.getInstance().playEffect(type, x, y, faceRight);
+
         }
     }
 

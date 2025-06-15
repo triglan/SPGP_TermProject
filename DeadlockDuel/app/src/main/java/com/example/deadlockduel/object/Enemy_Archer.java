@@ -83,7 +83,7 @@ public class Enemy_Archer extends Enemy {
 
             Paint paint = new Paint();
             paint.setColor(Color.YELLOW);
-            paint.setTextSize(48);
+            paint.setTextSize(100);
             paint.setFakeBoldText(true);
             paint.setTextAlign(Paint.Align.CENTER);
 

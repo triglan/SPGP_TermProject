@@ -62,9 +62,7 @@ public class AttackCommand {
                 int x = blockRect.centerX() - frames[0].getWidth() / 2;
                 int y = blockRect.centerY() - frames[0].getHeight() / 2 + offsetY;
 
-                EffectManager.getInstance().addEffect(
-                        new AttackEffect(frames, x, y, faceRight, scale)
-                );
+                EffectManager.getInstance().playEffect(type, x, y, faceRight);
             }
         }
     }
