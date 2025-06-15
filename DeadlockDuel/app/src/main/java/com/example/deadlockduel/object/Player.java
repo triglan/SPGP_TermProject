@@ -15,7 +15,10 @@ import java.util.ArrayList;
 import java.util.Set;
 
 import com.example.deadlockduel.framework.battle.AttackCommand;
+import com.example.deadlockduel.framework.battle.AttackEffect;
 import com.example.deadlockduel.framework.battle.AttackType;
+import com.example.deadlockduel.framework.battle.EffectManager;
+import com.example.deadlockduel.framework.core.BlockRectProvider;
 import com.example.deadlockduel.framework.data.WeaponDatabase;
 import com.example.deadlockduel.framework.data.WeaponInfo;
 
@@ -33,6 +36,10 @@ public class Player {
     private int hp = 10, maxHp = 10;
     private int blockCount;
     private final Resources res;
+    private long lastAttackEffectEndTime = 0;
+    private boolean isExecutingQueue = false;
+    private final long ATTACK_EFFECT_INTERVAL = 500; // 0.5초
+    private BlockRectProvider blockRectProvider;
 
     // 공격 큐 및 무기 쿨타임 관련 필드
     private final List<AttackCommand> attackQueue = new ArrayList<>();
@@ -75,7 +82,7 @@ public class Player {
         Log.d("Player", "✅ 공격 큐 추가됨: ...");
         return true;
     }
-    // 공격 실행 (적 리스트 입력 필요)
+    // 공격 실행
     public void executeAttackQueue(List<Enemy> enemies) {
         for (AttackCommand cmd : attackQueue) {
             // 🧩 무기 타입에 따른 사거리와 데미지 설정
@@ -99,6 +106,21 @@ public class Player {
 
             if (closest != null) {
                 closest.takeDamage(dmg);
+
+                //  공격 이펙트 처리
+                AttackType type = cmd.type;
+                Bitmap[] frames = type.effectFrames;
+                boolean faceRight = type.effectFacesRight;
+                int offsetY = type.offsetY;
+
+                // 이펙트 좌표 계산 (적 draw 기준 중앙)
+                Rect enemyRect = closest.getCurrentDrawRect(); // ← 적 클래스에 이 메서드 추가 필요
+                int x = enemyRect.left;
+                int y = enemyRect.top + offsetY;
+
+                float scale = type.effectScale;
+                AttackEffect effect = new AttackEffect(frames, x, y, faceRight, scale);
+                EffectManager.getInstance().addEffect(effect);
             }
         }
 
@@ -197,13 +219,100 @@ public class Player {
         Log.d("Player", "⟳ 회전: direction = " + direction);
     }
 
-    public void update() {
+    public void update(List<Enemy> enemies) {
         frameTick++;
         if (frameTick >= frameInterval) {
             frameTick = 0;
             sprite.setFrame(sprite.getFrameIndex() + 1);
         }
+
+        if (isExecutingQueue && System.currentTimeMillis() >= lastAttackEffectEndTime) {
+            executeNextAttack(enemies);
+        }
     }
+    public void setBlockRectProvider(BlockRectProvider provider) {
+        this.blockRectProvider = provider;
+    }
+    public void startAttackQueue() {
+        if (!attackQueue.isEmpty()) {
+            isExecutingQueue = true;
+            lastAttackEffectEndTime = 0; // 첫 공격 즉시 실행
+        }
+    }
+
+    private void executeNextAttack(List<Enemy> enemies) {
+        if (attackQueue.isEmpty()) {
+            isExecutingQueue = false;
+            return;
+        }
+
+        AttackCommand cmd = attackQueue.remove(0);
+        AttackType type = cmd.type;
+        WeaponInfo info = WeaponDatabase.get(type);
+        int dmg = info.baseDamage + (cmd.isBonus ? 1 : 0);
+        int range = info.range;
+
+        int direction = this.direction; // 1 = 오른쪽, -1 = 왼쪽
+        int playerPos = this.blockIndex;
+
+        Enemy closest = null;
+        int minDist = Integer.MAX_VALUE;
+
+        for (Enemy enemy : enemies) {
+            int enemyPos = enemy.getBlockIndex();
+            int rawDist = enemyPos - playerPos;
+
+            // ✅ 방향성 + 사거리 + 가장 가까운 적
+            if ((rawDist * direction > 0) && Math.abs(rawDist) <= range && Math.abs(rawDist) < minDist) {
+                closest = enemy;
+                minDist = Math.abs(rawDist);
+            }
+        }
+
+        // 💥 공격 이펙트 위치용 블럭
+        Rect targetBlockRect = null;
+
+        if (closest != null) {
+            // 적이 있으면 → 공격 및 이펙트
+            closest.takeDamage(dmg);
+            targetBlockRect = blockRectProvider.getBlockRect(closest.getBlockIndex());
+        } else {
+            // 적이 없으면 → 앞 칸에 이펙트만 출력
+            int frontBlockIndex = playerPos + direction;
+            if (frontBlockIndex >= 0 && frontBlockIndex < blockCount) {
+                targetBlockRect = blockRectProvider.getBlockRect(frontBlockIndex);
+                if (targetBlockRect == null) {
+                    lastAttackEffectEndTime = System.currentTimeMillis() + ATTACK_EFFECT_INTERVAL;
+                    return; // 앞칸도 비어있으면 아무것도 안함
+                }
+            } else {
+                lastAttackEffectEndTime = System.currentTimeMillis() + ATTACK_EFFECT_INTERVAL;
+                return; // 범위 밖
+            }
+        }
+
+        // 💥 이펙트 생성
+        Bitmap[] frames = type.effectFrames;
+        boolean faceRight = type.effectFacesRight;
+        boolean enlarged = (type == AttackType.POWER);
+        int offsetY = type.offsetY;
+
+        int centerX = targetBlockRect.centerX();
+        int centerY = targetBlockRect.centerY();
+        int tileSize = targetBlockRect.width();
+
+        int x = centerX - tileSize / 2 + tileSize / 3; // ← 오른쪽으로 1/3 이동
+        int y = centerY - tileSize / 2 + offsetY;
+
+        float scale = type.effectScale;
+        AttackEffect effect = new AttackEffect(frames, x, y, faceRight, scale);
+        EffectManager.getInstance().addEffect(effect);
+
+        lastAttackEffectEndTime = System.currentTimeMillis() + ATTACK_EFFECT_INTERVAL;
+    }
+
+
+
 
     public void draw(Canvas canvas) {
         canvas.save();

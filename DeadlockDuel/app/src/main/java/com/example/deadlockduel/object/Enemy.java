@@ -101,6 +101,10 @@ public abstract class Enemy {
 
     public abstract void act(Player player, Enemy[] enemies, List<AttackCommand> attackQueue);
 
+    public Rect getCurrentDrawRect() {
+        return new Rect(drawX, drawY, drawX + sprite.getWidth(), drawY + sprite.getHeight());
+    }
+
     public void updateAnimation() {
         frameTick++;
         if (frameTick >= frameInterval) {

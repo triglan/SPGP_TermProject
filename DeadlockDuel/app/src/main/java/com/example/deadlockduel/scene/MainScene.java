@@ -17,6 +17,7 @@ import com.example.deadlockduel.framework.battle.AttackCommand;
 import com.example.deadlockduel.framework.battle.AttackEffect;
 import com.example.deadlockduel.framework.battle.AttackType;
 import com.example.deadlockduel.framework.battle.EffectManager;
+import com.example.deadlockduel.framework.core.BlockRectProvider;
 import com.example.deadlockduel.framework.core.TouchInputHandler;
 import com.example.deadlockduel.framework.core.TurnProcessor;
 import com.example.deadlockduel.framework.data.StageConfig;
@@ -29,7 +30,7 @@ import com.example.deadlockduel.object.Player;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainScene implements Scene {
+public class MainScene implements Scene, BlockRectProvider {
     private Bitmap background;
     private Paint blockPaint = new Paint();
     private ObjectManager objectManager;
@@ -65,8 +66,9 @@ public class MainScene implements Scene {
         background = BitmapFactory.decodeResource(res, config.backgroundResId);
         objectManager = new ObjectManager(res, screenWidth, screenHeight, config);
         turnProcessor = new TurnProcessor(this);
-        effectManager = new EffectManager();
+        effectManager = EffectManager.getInstance();
         inputHandler = new TouchInputHandler(this);
+        objectManager.getPlayer().setBlockRectProvider(this);
     }
 
     private void initEffects() {
@@ -95,34 +97,11 @@ public class MainScene implements Scene {
         AttackType.POWER.offsetY = -30;
     }
 
-    public void goToNextStageIfAvailable() {
-        if (stageManager.hasNext()) {
-            stageManager.nextStage();
-            config = stageManager.getCurrentStage();
-            initStage();
-            initEffects(); // 이펙트도 초기화 필요할 경우
-        }
-    }
-    private void handleAttackButton(int weaponIndex) {
-        long now = System.currentTimeMillis();
-        boolean success = objectManager.getPlayer().tryAddAttack(weaponIndex, now);
-        if (!success) {
-            // TODO: 아이콘 흔들림 등 시각효과 추가 가능
-        } else {
-            // TODO: 공격 아이콘 머리 위에 띄우기 등 가능
-        }
-    }
-
-    private void handleExecuteAttack() {
-        Player player = objectManager.getPlayer();
-        List<Enemy> enemies = objectManager.getEnemies();
-        player.executeAttackQueue(enemies);
-    }
 
     public void update() {
         for (Block block : objectManager.getBlocks()) block.reset();
 
-        objectManager.getPlayer().update();
+        objectManager.getPlayer().update(objectManager.getEnemies());
         objectManager.getPlayer().updateBlockState(objectManager.getBlocks());
 
         for (Enemy enemy : objectManager.getEnemies()) {
@@ -141,31 +120,15 @@ public class MainScene implements Scene {
         }
     }
 
-    public void performAttack(AttackType type) {
-        AttackCommand cmd = new AttackCommand(type, objectManager.getPlayer(), false);
-        cmd.execute(
-                objectManager.getEnemies().toArray(new Enemy[0]),
-                effectManager.getEffects(),
-                objectManager.getPlayer(),
-                objectManager.getBlocks()
-        );
-    }
-
-    public void executeNextAttack() {
-        if (attackQueue.isEmpty()) return;
-        AttackCommand cmd = attackQueue.remove(0);
-        cmd.execute(
-                objectManager.getEnemies().toArray(new Enemy[0]),
-                effectManager.getEffects(),
-                objectManager.getPlayer(),
-                objectManager.getBlocks()
-        );
-    }
 
 
     // 플레이어가 공격 실행 버튼을 눌렀을 때 호출됨
+//    public void handlePlayerExecuteAttack() {
+//        objectManager.getPlayer().executeAttackQueue(objectManager.getEnemies());
+//        updateCooldownUI();
+//    }
     public void handlePlayerExecuteAttack() {
-        objectManager.getPlayer().executeAttackQueue(objectManager.getEnemies());
+        objectManager.getPlayer().startAttackQueue();
         updateCooldownUI();
     }
     public void updateCooldownUI() {
@@ -177,9 +140,6 @@ public class MainScene implements Scene {
         ((TextView) ((Activity) context).findViewById(R.id.textCooldown3)).setText(cd[2] + "/" + max[2]);
     }
 
-    public void executeAllAttacks() {
-        objectManager.getPlayer().executeAttackQueue(objectManager.getEnemies());
-    }
     public void handlePlayerMoveLeft() {
         objectManager.getPlayer().moveLeft();
         turnProcessor.advanceTurn();
@@ -261,8 +221,6 @@ public class MainScene implements Scene {
     }
 
     public Player getPlayer() { return objectManager.getPlayer(); }
-    public int getBlockCount() { return objectManager.getBlockCount(); }
-    public List<AttackEffect> getEffects() { return effectManager.getEffects(); }
     public Rect getBlockRect(int index) { return objectManager.getBlockRect(index); }
 
     @Override public boolean onTouchEvent(MotionEvent event) { return inputHandler.handleTouch(event); }

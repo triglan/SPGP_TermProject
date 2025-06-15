@@ -49,9 +49,12 @@ public class AttackCommand {
 
                 boolean finalFacingRight = (direction == 1) == type.effectFacesRight;
 
+                float scale = type.effectScale;
                 effects.add(new AttackEffect(
                         type.effectFrames, effectX, effectY, finalFacingRight,
-                        perfectTiming));
+                        scale
+                ));
+
             }
         }
     }
