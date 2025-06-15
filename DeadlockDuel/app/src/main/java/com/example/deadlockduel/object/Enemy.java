@@ -24,9 +24,15 @@ public abstract class Enemy {
     protected int hp = 5;
     protected int maxHp = 5;
 
-    // ✅ 피격 연출용 변수
+    // 피격 연출용 변수
     protected int hitFlashTimer = 0;
     protected int hitShakeTimer = 0;
+
+    // 아이콘 흔들림
+    protected boolean shaking = false;
+    protected long shakeStartTime = 0;
+    protected final long SHAKE_INTERVAL = 50;
+
 
     public void setBlockCount(int count) {
         this.blockCount = count;
@@ -105,6 +111,18 @@ public abstract class Enemy {
         return new Rect(drawX, drawY, drawX + sprite.getWidth(), drawY + sprite.getHeight());
     }
 
+    public void startShaking() {
+        if (!shaking) {
+            shaking = true;
+            shakeStartTime = System.currentTimeMillis();
+        }
+    }
+
+    public void stopShaking() {
+        shaking = false;
+    }
+
+
     public void updateAnimation() {
         frameTick++;
         if (frameTick >= frameInterval) {
@@ -120,12 +138,22 @@ public abstract class Enemy {
 
         canvas.save();
 
-        // ✅ 흔들림 처리
-        // int shakeOffset = (hitShakeTimer > 0) ? ((hitShakeTimer % 2 == 0) ? -6 : 6) : 0;
         int shakeOffset = 0;
+
+        //  기존 피격 흔들림 유지
         if (hitShakeTimer > 0) {
             int shakePhase = (hitShakeTimer / 4) % 2;
             shakeOffset = (shakePhase == 0) ? -16 : 16;
+        }
+
+        //  새로 추가된 흔들림 애니메이션 (shaking 상태)
+        if (shaking) {
+            long elapsed = System.currentTimeMillis() - shakeStartTime;
+            if ((elapsed / SHAKE_INTERVAL) % 2 == 0) {
+                shakeOffset += 5;
+            } else {
+                shakeOffset -= 5;
+            }
         }
         canvas.translate(shakeOffset, 0);
 
@@ -170,6 +198,8 @@ public abstract class Enemy {
         float ratio = (float) hp / maxHp;
         canvas.drawRect(barX, barY, barX + (int)(barWidth * ratio), barY + barHeight, hpPaint);
     }
+
+
 
     public boolean isDead() {
         return isDead;

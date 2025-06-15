@@ -120,13 +120,26 @@ public class MainScene implements Scene, BlockRectProvider {
         }
     }
 
+    public void executeEnemyAttacks() {
+        List<AttackEffect> effects = new ArrayList<>();
+
+        for (AttackCommand cmd : attackQueue) {
+            cmd.execute(
+                    objectManager.getEnemies().toArray(new Enemy[0]),
+                    effects,
+                    objectManager.getPlayer(),
+                    objectManager.getBlocks()
+            );
+        }
+
+        for (AttackEffect effect : effects) {
+            EffectManager.getInstance().addEffect(effect);
+        }
+
+        attackQueue.clear();
+    }
 
 
-    // 플레이어가 공격 실행 버튼을 눌렀을 때 호출됨
-//    public void handlePlayerExecuteAttack() {
-//        objectManager.getPlayer().executeAttackQueue(objectManager.getEnemies());
-//        updateCooldownUI();
-//    }
     public void handlePlayerExecuteAttack() {
         objectManager.getPlayer().startAttackQueue();
         updateCooldownUI();

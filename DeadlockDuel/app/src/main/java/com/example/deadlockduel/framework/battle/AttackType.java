@@ -3,9 +3,9 @@ package com.example.deadlockduel.framework.battle;
 import android.graphics.Bitmap;
 
 public enum AttackType {
-    MELEE(1, 1, 0, 1),
+    MELEE(1, 1, 0, 1.7f),
     LONG_RANGE(1, 2, 1, 3),
-    POWER(2, 2, 2, 1.5f);
+    POWER(2, 2, 2, 1.7f);
 
     public final int power;
     public final int range;

@@ -301,7 +301,7 @@ public class Player {
         int centerY = targetBlockRect.centerY();
         int tileSize = targetBlockRect.width();
 
-        int x = centerX - tileSize / 2 + tileSize / 3; // ← 오른쪽으로 1/3 이동
+        int x = centerX - tileSize / 2 + tileSize / 4; // ← 오른쪽으로 1/3 이동
         int y = centerY - tileSize / 2 + offsetY;
 
         float scale = type.effectScale;
