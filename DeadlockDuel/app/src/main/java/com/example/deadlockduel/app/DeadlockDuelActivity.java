@@ -12,50 +12,44 @@ import com.example.deadlockduel.framework.core.GameView;
 import com.example.deadlockduel.framework.manager.StageManager;
 import com.example.deadlockduel.object.Player;
 import com.example.deadlockduel.scene.MainScene;
+import com.example.deadlockduel.scene.SceneManager;
+import com.example.deadlockduel.scene.Scene;
+
 
 public class DeadlockDuelActivity extends AppCompatActivity {
-
-
+    private GameView gameView;
+    private MainScene mainScene;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_deadlock_duel);
 
-        GameView gameView = findViewById(R.id.gameView);
-
-        // ✅ StageManager 생성
+        gameView = findViewById(R.id.gameView);
         StageManager stageManager = new StageManager();
 
-        // ✅ MainScene 생성 시 StageManager 넘김
-        MainScene mainScene = new MainScene(
+        mainScene = new MainScene(
                 getResources(),
                 getWindowManager().getDefaultDisplay().getWidth(),
                 getWindowManager().getDefaultDisplay().getHeight(),
                 stageManager,
-                DeadlockDuelActivity.this
+                this
         );
         gameView.setInitialScene(mainScene);
 
-        Player player = mainScene.getPlayer();
+        // 버튼 세팅 생략...
+    }
 
-        Button btnLeft = findViewById(R.id.btnLeft);
-        Button btnRight = findViewById(R.id.btnRight);
-        Button btnRotate = findViewById(R.id.btnRotate);
-        ImageButton btnAttack1 = findViewById(R.id.btnAttack1);
-        ImageButton btnAttack2 = findViewById(R.id.btnAttack2);
-        ImageButton btnAttack3 = findViewById(R.id.btnAttack3);
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mainScene != null) mainScene.onPause();
+    }
 
-        btnLeft.setOnClickListener(v -> mainScene.handlePlayerMoveLeft());
-        btnRight.setOnClickListener(v -> mainScene.handlePlayerMoveRight());
-        btnRotate.setOnClickListener(v -> mainScene.handlePlayerRotate());
-
-        btnAttack1.setOnClickListener(v -> mainScene.handlePlayerAttack(AttackType.MELEE));
-        btnAttack2.setOnClickListener(v -> mainScene.handlePlayerAttack(AttackType.LONG_RANGE));
-        btnAttack3.setOnClickListener(v -> mainScene.handlePlayerAttack(AttackType.POWER));
-
-        Button btnAttackExecute = findViewById(R.id.btnAttackExecute);
-        btnAttackExecute.setOnClickListener(v -> mainScene.handlePlayerExecuteAttack());
-
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mainScene != null) mainScene.onResume();
     }
 }
+

@@ -145,23 +145,35 @@ public class Player {
         drawY = blockRect.top - drawHeight;
     }
 
-    public void moveLeft() {
+    public void moveLeft(Block[] blocks) {
         if (blockIndex > 0) {
+            Block targetBlock = blocks[blockIndex - 1];
+            if (targetBlock.hasEnemy()) {
+                Log.d("Player", "❌ 왼쪽에 적이 있어 이동 불가");
+                return;
+            }
             blockIndex--;
             Log.d("Player", "← 이동: blockIndex = " + blockIndex);
         } else {
-            Log.d("Player", "왼쪽 끝이라 이동 불가");
+            Log.d("Player", "❌ 왼쪽 끝이라 이동 불가");
         }
     }
 
-    public void moveRight() {
+
+    public void moveRight(Block[] blocks) {
         if (blockIndex < blockCount - 1) {
+            Block targetBlock = blocks[blockIndex + 1];
+            if (targetBlock.hasEnemy()) {
+                Log.d("Player", "❌ 오른쪽에 적이 있어 이동 불가");
+                return;
+            }
             blockIndex++;
             Log.d("Player", "→ 이동: blockIndex = " + blockIndex);
         } else {
-            Log.d("Player", "오른쪽 끝이라 이동 불가");
+            Log.d("Player", "❌ 오른쪽 끝이라 이동 불가");
         }
     }
+
 
     public void reset(int blockIndex, boolean faceRight) {
         this.blockIndex = blockIndex;

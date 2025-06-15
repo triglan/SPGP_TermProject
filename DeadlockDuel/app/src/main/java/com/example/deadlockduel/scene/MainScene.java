@@ -87,7 +87,7 @@ public class MainScene implements Scene, BlockRectProvider {
         rangeSoundId = soundPool.load(context, R.raw.attack_range_sound, 1);
         powerSoundId = soundPool.load(context, R.raw.attack_power_sound, 1);
     }
-    private void playBgm(Integer resId, boolean loop) {
+    private void playBgm(Integer resId, boolean loop, int startMs) {
         if (bgmPlayer != null) {
             bgmPlayer.stop();
             bgmPlayer.release();
@@ -96,10 +96,21 @@ public class MainScene implements Scene, BlockRectProvider {
 
         if (resId != null) {
             bgmPlayer = MediaPlayer.create(context, resId);
-            bgmPlayer.setLooping(loop);
-            bgmPlayer.start();
+            if (bgmPlayer != null) {
+                bgmPlayer.setLooping(loop);
+                bgmPlayer.setVolume(0.33f, 0.33f);
+                try {
+                    bgmPlayer.seekTo(startMs);
+                    bgmPlayer.start(); // 💡 바로 start() 호출
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            // 만약 create()는 준비 완료 상태로 리턴되므로 보통 onPrepared는 즉시 호출됨
         }
     }
+
 
 
     private void initRetryButton() {
@@ -152,13 +163,13 @@ public class MainScene implements Scene, BlockRectProvider {
         int stage = stageManager.getCurrentStageNumber();
         switch (stage) {
             case 1:
-                playBgm(R.raw.stage1_bgm, true); break;
+                playBgm(R.raw.stage1_bgm, true,0); break;
             case 2:
-                playBgm(R.raw.stage2_bgm, true); break;
+                playBgm(R.raw.stage2_bgm, true,0); break;
             case 3:
-                playBgm(R.raw.stage3_bgm, true); break;
+                playBgm(R.raw.stage3_bgm, true,0); break;
             default:
-                playBgm(null, false); // fallback 또는 무음
+                playBgm(null, false,0); // fallback 또는 무음
         }
     }
 
@@ -204,7 +215,7 @@ public class MainScene implements Scene, BlockRectProvider {
 
         if (!isGameOver && player.isDead()) {
             isGameOver = true;
-            playBgm(R.raw.gameover, true);
+            playBgm(R.raw.gameover, true,0);
             ((Activity) context).runOnUiThread(() -> {
                 retryButton.setVisibility(View.VISIBLE);
             });
@@ -236,7 +247,6 @@ public class MainScene implements Scene, BlockRectProvider {
     }
     private void onStageClear() {
         if (stageManager.hasNext()) {
-            // 클리어 텍스트 UI
             TextView clearText = new TextView(context);
             clearText.setText("CLEAR!");
             clearText.setTextSize(48);
@@ -252,30 +262,34 @@ public class MainScene implements Scene, BlockRectProvider {
 
             ((Activity) context).runOnUiThread(() -> {
                 ((Activity) context).addContentView(clearText, params);
-                playBgm(R.raw.clear, false); // 클리어 BGM 재생 (loop = false)
             });
 
-            // 3초 후 다음 스테이지로 전환
+            playBgm(R.raw.clear, false, 2800);
+            // 🔁 텍스트 제거 (3초 후)
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                stageManager.nextStage();  // 다음 스테이지로 인덱스 증가
-                config = stageManager.getCurrentStage(); // 새로운 스테이지 정보 갱신
+                ((Activity) context).runOnUiThread(() -> {
+                    ((FrameLayout) ((Activity) context).findViewById(android.R.id.content)).removeView(clearText);
+                });
 
-                initStage();   // 맵, 플레이어, 적 초기화
-                initEffects(); // 이펙트 초기화
-                updateCooldownUI(); // UI도 초기화
 
-                playBgm(null, false); // BGM 정지
+
+                stageManager.nextStage();
+                config = stageManager.getCurrentStage();
+                initStage();
+                initEffects();
+                updateCooldownUI();
                 isStageClear = false;
                 isGameOver = false;
             }, 3000);
         } else {
-            // 마지막 스테이지 클리어 시 처리
+            // 마지막 스테이지
             ((Activity) context).runOnUiThread(() -> {
                 retryButton.setVisibility(View.VISIBLE);
-                playBgm(R.raw.clear, false);
+                playBgm(R.raw.clear, false, 5000); // 엔딩 클리어 브금도 5초부터
             });
         }
     }
+
 
 
 
@@ -324,14 +338,17 @@ public class MainScene implements Scene, BlockRectProvider {
         });
     }
 
+    public Block[] getBlocks() {
+        return objectManager.getBlocks();
+    }
 
     public void handlePlayerMoveLeft() {
-        objectManager.getPlayer().moveLeft();
+        objectManager.getPlayer().moveLeft(objectManager.getBlocks());
         turnProcessor.advanceTurn();
     }
 
     public void handlePlayerMoveRight() {
-        objectManager.getPlayer().moveRight();
+        objectManager.getPlayer().moveRight(objectManager.getBlocks());
         turnProcessor.advanceTurn();
     }
 
@@ -407,13 +424,29 @@ public class MainScene implements Scene, BlockRectProvider {
 
     }
 
+    public void stopBgm() {
+        if (bgmPlayer != null) {
+            if (bgmPlayer.isPlaying()) {
+                bgmPlayer.stop();
+            }
+            bgmPlayer.release();
+            bgmPlayer = null;
+        }
+    }
+
+
     public Player getPlayer() { return objectManager.getPlayer(); }
     public Rect getBlockRect(int index) { return objectManager.getBlockRect(index); }
 
     @Override public boolean onTouchEvent(MotionEvent event) { return inputHandler.handleTouch(event); }
     @Override public void onEnter() { }
     @Override public void onExit() { }
-    @Override public void onPause() { }
-    @Override public void onResume() { }
+    @Override
+    public void onPause() {
+        stopBgm();  // 앱 비활성화 시 브금 정지
+    }
+    @Override public void onResume() {if (!isGameOver && !isStageClear) {
+        playStageBgm();  // 현재 스테이지 BGM 다시 재생
+    } }
     @Override public boolean onBackPressed() { return false; }
 }

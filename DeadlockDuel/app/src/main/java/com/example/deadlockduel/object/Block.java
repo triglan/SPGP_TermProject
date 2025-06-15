@@ -28,6 +28,9 @@ public class Block {
     public Rect getRect() {
         return rect;
     }
+    public boolean hasEnemy() {
+        return hasEnemy;
+    }
 
     public void draw(Canvas canvas, Paint paint) {
         if (willBeAttacked) {

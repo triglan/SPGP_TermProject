@@ -20,9 +20,9 @@ public class TouchInputHandler {
 
 
         if (x < screenWidth / 3f) {
-            scene.getPlayer().moveLeft();   // 왼쪽으로 이동
+            scene.getPlayer().moveLeft(scene.getBlocks());
         } else if (x < screenWidth * 2f / 3f) {
-            scene.getPlayer().moveRight();  // 오른쪽으로 이동
+            scene.getPlayer().moveRight(scene.getBlocks());
         } else {
             scene.handlePlayerAttack(AttackType.MELEE); // 공격
         }
