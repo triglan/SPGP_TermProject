@@ -25,7 +25,7 @@ public abstract class Enemy {
     protected int maxHp = 5;
     protected int attackPower = 1;
 
-    // ✅ 피격 연출용 변수
+    //  피격 연출용 변수
     protected int hitFlashTimer = 0;
     protected int hitShakeTimer = 0;
 
