@@ -45,6 +45,10 @@ public class StageManager {
     public boolean hasNext() {
         return currentStageIndex + 1 < stages.size();
     }
+    public StageConfig resetAndGetFirstStage() {
+        currentStageIndex = 0;
+        return stages.get(currentStageIndex);
+    }
 
     public void nextStage() {
         if (hasNext()) {
@@ -59,4 +63,5 @@ public class StageManager {
     public void reset() {
         currentStageIndex = 0;
     }
+
 }

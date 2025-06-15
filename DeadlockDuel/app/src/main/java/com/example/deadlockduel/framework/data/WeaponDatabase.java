@@ -8,7 +8,7 @@ public class WeaponDatabase {
     private static final Map<AttackType, WeaponInfo> weaponMap = new HashMap<>();
 
     static {
-        weaponMap.put(AttackType.MELEE,      new WeaponInfo(4, 2, 1));
+        weaponMap.put(AttackType.MELEE,      new WeaponInfo(10, 2, 1));
         weaponMap.put(AttackType.LONG_RANGE, new WeaponInfo(2, 3, 999));
         weaponMap.put(AttackType.POWER,      new WeaponInfo(3, 3, 2));
     }

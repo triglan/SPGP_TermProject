@@ -34,45 +34,98 @@
             android:layout_height="wrap_content"
             android:text="⟳" />
 
-        <!-- 공격 버튼: 이미지 버튼 버전 -->
-        <ImageButton
-            android:id="@+id/btnAttack1"
+        <!-- 공격 버튼 1 -->
+        <FrameLayout
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_margin="4dp"
-            android:src="@drawable/attack_icon_melee"
-            android:background="@android:color/transparent"
-            app:tint="@null"
-            android:scaleType="fitCenter"
-            android:contentDescription="공격1" />
+            android:layout_margin="4dp">
 
-        <ImageButton
-            android:id="@+id/btnAttack2"
+            <ImageButton
+                android:id="@+id/btnAttack1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/attack_icon_melee"
+                android:background="@android:color/transparent"
+                app:tint="@null"
+                android:scaleType="fitCenter"
+                android:contentDescription="공격1" />
+
+            <TextView
+                android:id="@+id/textCooldown1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center"
+                android:layout_marginBottom="2dp"
+                android:text="2/2"
+                android:textColor="#FFFFFFFF"
+                android:textSize="18sp"
+                android:background="@android:color/transparent" />
+        </FrameLayout>
+
+        <!-- 공격 버튼 2 -->
+        <FrameLayout
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_margin="4dp"
-            android:src="@drawable/attack_icon_range"
-            android:background="@android:color/transparent"
-            app:tint="@null"
-            android:scaleType="fitCenter"
-            android:contentDescription="공격2" />
+            android:layout_margin="4dp">
 
-        <ImageButton
-            android:id="@+id/btnAttack3"
+            <ImageButton
+                android:id="@+id/btnAttack2"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/attack_icon_range"
+                android:background="@android:color/transparent"
+                app:tint="@null"
+                android:scaleType="fitCenter"
+                android:contentDescription="공격2" />
+
+            <TextView
+                android:id="@+id/textCooldown2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center"
+                android:layout_marginBottom="2dp"
+                android:text="3/3"
+                android:textColor="#FFFFFFFF"
+                android:textSize="18sp"
+                android:background="@android:color/transparent" />
+        </FrameLayout>
+
+        <!-- 공격 버튼 3 -->
+        <FrameLayout
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_margin="4dp"
-            android:src="@drawable/attack_icon_power"
-            android:background="@android:color/transparent"
-            app:tint="@null"
-            android:scaleType="fitCenter"
-            android:contentDescription="공격3" />
+            android:layout_margin="4dp">
 
+            <ImageButton
+                android:id="@+id/btnAttack3"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/attack_icon_power"
+                android:background="@android:color/transparent"
+                app:tint="@null"
+                android:scaleType="fitCenter"
+                android:contentDescription="공격3" />
+
+            <TextView
+                android:id="@+id/textCooldown3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center"
+                android:layout_marginBottom="2dp"
+                android:text="3/3"
+                android:textColor="#FFFFFFFF"
+                android:textSize="18sp"
+                android:background="@android:color/transparent" />
+        </FrameLayout>
+
+        <!-- 공격 실행 버튼 -->
         <Button
             android:id="@+id/btnAttackExecute"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Attack" />
+            android:text="공격 실행"
+            android:layout_margin="4dp" />
+
 
         <Button
             android:id="@+id/btnRight"
