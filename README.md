@@ -1,8 +1,48 @@
 # 프로젝트 제목 : Deadlock Duel
 
-## 게임에 대한 간단한 소개
-한 줄로 된 좁은 전장에서 플레이어와 적이 번갈아 가며 전투를 수행하는 턴제 전투 게임.
-03928d194615b206ab3f7e7e1fc8760ea755870c
+# 발표 영상
+1차 https://www.youtube.com/watch?v=MnolG0xyAEE
+2차 https://youtu.be/smRpqMz60HA
+3차 
+# ReadMe
+1차 https://github.com/triglan/SPGP_TermProject/blob/main/README.md](https://github.com/triglan/SPGP_TermProject/blob/8e31e3ab9821c4b35cc95ff7e5cd36a1dc7c1851/README.md)
+2차https://github.com/triglan/SPGP_TermProject/blob/03928d194615b206ab3f7e7e1fc8760ea755870c/README.md
+3차 https://github.com/triglan/SPGP_TermProject/blob/main/README.md
+
+## 게임 소개
+**Deadlock Duel**은 제한된 공간에서 전략적 이동과 공격 대기열을 기반으로 전투를 펼치는 턴제 퍼즐 액션 게임이다.  
+
+## 🛠 사용 기술
+
+- 
+
+---
+
+##  참고 및 차용
+- 버튼 UI구현
+- 프레임워크 구조
+- bgm 구조
+
+---
+
+##  직접 구현한 것
+
+- 공격 대기열 시스템 (공격 큐 추가 / 실행 구조)
+- Enemy 종류별 AI 패턴 (Rogue / Knight / Archer)
+- 예고 공격, 머리 위 느낌표, 이펙트 타이밍 처리
+- StageManager에 의한 스테이지 구성 및 적 배치
+- UI 애니메이션
+
+---
+
+##  아쉬운 점
+
+- 타이밍에 맞게 버튼을 눌러 피지컬 요소도 구현하고 싶었다. 수업  리듬게임에서 차용하고자 했으나 아쉽게도 못했다.
+- 수업에서 턴제 게임이나
+- 일부 기기에서 그래픽/성능 이슈
+- 적 사망 시 느낌표 제거 처리 누락 경험
+- 전체 설계를 미리 정리하지 않아 구조 수정이 잦았음
+
 **********
 ## 현재까지의 진행 상황
 
@@ -12,47 +52,17 @@
 | 2주차  | 맵 타일 그리기, 캐릭터 배치 및 이동 버튼 구현                         | <p align="center">100%</p>      |
 | 3주차  | 무기 시스템 구현, 플레이어 공격 구현                                   | <p align="center">70%</p>        |
 | 4주차  | 적 캐릭터 3종 구현, 턴 기반 전투 시스템 구현                          | <p align="center">100%</p>       |
-| 5주차  | 3라운드 로직 완성, 클리어 / 사망 처리 화면                            | <p align="center">50%</p>        |
-| 6주차  | 적 AI 구현, 타격 효과 및 배경 음악 연결                                | <p align="center">30%</p>        |
-| 7주차  | 플레이어/적 애니메이션, 무기강화, 추가 UI, 일시정지 기능 구현         | <p align="center">30%</p>        |
-| 8주차  | 애니메이션 마무리, 디버깅 및 버그 수정, 최종 발표 준비                |   <p align="center">-</p>    |
+| 5주차  | 3라운드 로직 완성, 클리어 / 사망 처리 화면                            | <p align="center">100%</p>        |
+| 6주차  | 적 AI 구현, 타격 효과 및 배경 음악 연결                                | <p align="center">100%</p>        |
+| 7주차  | 플레이어/적 애니메이션, 무기강화, 추가 UI, 일시정지 기능 구현         | <p align="center">50%</p>        |
+| 8주차  | 애니메이션 마무리, 디버깅 및 버그 수정, 최종 발표 준비                |   <p align="center">66%</p>    |
 
 
 ## git commit 을 얼마나 자주 했는지 알 수 있는 자료 (github-insights-commits 포함)
-![Image](https://github.com/user-attachments/assets/299c6113-3fcd-4ca7-a7b7-9eab06c61f12)
+![Image](https://github.com/user-attachments/assets/69061e40-8e81-4060-948a-ec5053c94a71)
 
-### 주별 commit 수를 주차별 표로 만들어 포함할 것
 
-| 주차   | 날짜 범위     | 주간 커밋 수 |
-|--------|--------------|--------------|
-| 1주차  | 4/8 ~ 4/14   | 10회          |
-| 2주차  | 4/15 ~ 4/21  | 1회          |
-| 3주차  | 4/22 ~ 4/28  | 1회          |
-| 4주차  | 4/29 ~ 5/5   | 0회         |
-| 5주차  | 5/6 ~ 5/12   | 22회         |
 
-## MainScene 에 등장하는 game object 들에 대하여 다음 사항 포함
-## 🎯 MainScene 구성 오브젝트 정리
-
-| 클래스 이름  | 구성 및 동작 정보 | 상호작용 정보 | 책임지는 핵심 기능 |
-|--------------|------------------|----------------|--------------------|
-| `Player`     | - 애니메이션 스프라이트 <br> - 블럭 인덱스 기준으로 이동 및 방향 전환 | - `Block[]`을 통해 위치 갱신 <br> - `Enemy`로부터 공격 받음 <br> - 공격 수행 시 `AttackEffect` 추가 | - 플레이어 조작 반영 <br> - 위치/방향 제어 <br> - 공격 트리거 생성 |
-| `Enemy` (Knight, Archer, Rogue) | - 각 타입별 AI 기반 행위 <br> - 고유 애니메이션 포함 | - `Player`를 인식하고 반응 <br> - `Block[]`으로 위치 반영 <br>  | - AI 기반 행동 (`act`) 수행 <br> - 블럭 상태 갱신 <br> - 공격 로직 참여 |
-| `Block`      | - `Rect`로 위치 정보 관리 <br> - 색상 및 상태 렌더링 | - `Player`, `Enemy`가 점유 상태 변경 <br> - 충돌 및 상태 판단 기준 | - 위치 렌더링 <br> - 점유 상태 초기화/업데이트 |
-| `AttackEffect` | - 이펙트 애니메이션 프레임 <br> - `offsetY`, 방향 정보 포함 | - `Player`, `Enemy`에게 시각적 효과 제공 | - 공격 시 시각 효과 표시 <br> - 애니메이션 종료 시 자동 제거 |
-| `AttackType` | - 공격 종류별 효과 프레임 및 방향 설정 | - `AttackCommand`에서 사용됨 | - 이펙트 이미지, 오프셋, 방향 데이터 보유 |
-| `StageConfig` | - 시작 위치, 배경, 적 정보 포함 | - MainScene 생성 시 초기 세팅 정보 전달 | - 블럭 수, 배경 이미지, 적 스폰 위치 제공 |
 #### 인게임 이미지
-![Image](https://github.com/user-attachments/assets/1c77d952-a35c-4d66-936f-19ea9fdda891)
+![Image](https://github.com/user-attachments/assets/3cdae3ed-aa7e-4493-9367-7c671b6d05e5)
 
-
-## 구현 중 어려웠던 점 & 수업에서 다루었으면 하는 내용
-
-### 어려웠던 부분: 애니메이션 구현
-- 캐릭터와 이펙트의 애니메이션을 구현하는 과정에서 어려움이 많았습니다.
-- 특히 스프라이트 시트 방식에서 프레임별 흔들림 문제가 발생하여 어려움을 많이 겪었습니다.
-- 방향에 따라 애니메이션이 반전되어야 할 경우, 이미지 좌우 반전 처리, 오프셋 조정 등이 필요했어서 함수가 더 복잡해졌던 것 같습니다.
-
-### 수업에서 추가로 다루었으면 하는 부분
-- **간단한 게임 AI 패턴 구현 실습**
-  - 개인적으로 복잡하게 구현한 것 같아, 간단한 AI의 구조를 알 수 있으면 좋겠습니다.
