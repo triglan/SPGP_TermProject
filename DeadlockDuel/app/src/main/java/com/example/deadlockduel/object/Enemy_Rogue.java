@@ -11,6 +11,7 @@ import java.util.List;
 import com.example.deadlockduel.R;
 import com.example.deadlockduel.framework.battle.AttackCommand;
 import com.example.deadlockduel.framework.battle.AttackType;
+import com.example.deadlockduel.framework.battle.EnemyAttackCommand;
 
 public class
 Enemy_Rogue extends Enemy {
@@ -23,7 +24,8 @@ Enemy_Rogue extends Enemy {
         this.blockIndex = blockIndex;
         this.direction = faceRight ? 1 : -1;
         this.facingRight = faceRight;
-        setHp(3); // 도적 체력 3
+        setHp(5);
+        setAttackPower(3);
 
         int[] resIds = {
                 R.drawable.rogue_idle_1,
@@ -51,7 +53,7 @@ Enemy_Rogue extends Enemy {
 
         // 4. 느낌표 떠 있고 정면에 플레이어 있으면 공격
         if (alerted && playerIndex == frontIndex) {
-            attackQueue.add(new AttackCommand(AttackType.MELEE, player, false));
+            attackQueue.add(new EnemyAttackCommand(AttackType.MELEE, this, player));
             alerted = false;
             return;
         }
@@ -83,7 +85,7 @@ Enemy_Rogue extends Enemy {
     public void draw(Canvas canvas) {
         super.draw(canvas);
 
-        if (alerted) {
+        if (!isDead() && alerted) {
             Rect body = getCurrentDrawRect();
 
             Paint paint = new Paint();

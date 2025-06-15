@@ -74,57 +74,13 @@ public class Player {
         }
         boolean isBonus = (currentTimeMillis - lastAttackTime <= BONUS_WINDOW);
         AttackType type = AttackType.values()[weaponIndex];
-        attackQueue.add(new AttackCommand(type, this, isBonus));
+        attackQueue.add(new AttackCommand(type, this, null, isBonus));
 
         weaponCooldowns[weaponIndex] = 0; // 쿨타임 리셋
         lastAttackTime = currentTimeMillis;
 
         Log.d("Player", "✅ 공격 큐 추가됨: ...");
         return true;
-    }
-    // 공격 실행
-    public void executeAttackQueue(List<Enemy> enemies) {
-        for (AttackCommand cmd : attackQueue) {
-            // 🧩 무기 타입에 따른 사거리와 데미지 설정
-            WeaponInfo info = WeaponDatabase.get(cmd.type);
-            int dmg = info.baseDamage + (cmd.isBonus ? 1 : 0);
-            int range = info.range;
-
-            if (cmd.isBonus) dmg += 1;
-
-            int playerPos = this.blockIndex;
-            Enemy closest = null;
-            int minDist = Integer.MAX_VALUE;
-
-            for (Enemy enemy : enemies) {
-                int dist = Math.abs(enemy.getBlockIndex() - playerPos);
-                if (dist <= range && dist < minDist) {
-                    closest = enemy;
-                    minDist = dist;
-                }
-            }
-
-            if (closest != null) {
-                closest.takeDamage(dmg);
-
-                //  공격 이펙트 처리
-                AttackType type = cmd.type;
-                Bitmap[] frames = type.effectFrames;
-                boolean faceRight = type.effectFacesRight;
-                int offsetY = type.offsetY;
-
-                // 이펙트 좌표 계산 (적 draw 기준 중앙)
-                Rect enemyRect = closest.getCurrentDrawRect(); // ← 적 클래스에 이 메서드 추가 필요
-                int x = enemyRect.left;
-                int y = enemyRect.top + offsetY;
-
-                float scale = type.effectScale;
-                AttackEffect effect = new AttackEffect(frames, x, y, faceRight, scale);
-                EffectManager.getInstance().addEffect(effect);
-            }
-        }
-
-        attackQueue.clear();
     }
 
     //  턴 경과 시 쿨타임 증가
@@ -240,6 +196,12 @@ public class Player {
         }
     }
 
+    public void takeDamage(int damage) {
+        hp -= damage;
+        if (hp < 0) hp = 0;
+        // TODO: 피격 이펙트, 반짝임, 사망 처리 등 추가 가능
+    }
+
     private void executeNextAttack(List<Enemy> enemies) {
         if (attackQueue.isEmpty()) {
             isExecutingQueue = false;
@@ -248,68 +210,63 @@ public class Player {
 
         AttackCommand cmd = attackQueue.remove(0);
         AttackType type = cmd.type;
-        WeaponInfo info = WeaponDatabase.get(type);
-        int dmg = info.baseDamage + (cmd.isBonus ? 1 : 0);
-        int range = info.range;
 
-        int direction = this.direction; // 1 = 오른쪽, -1 = 왼쪽
+        // 가까운 적 찾기
         int playerPos = this.blockIndex;
+        int direction = this.direction;
+        int range = type.range;
 
         Enemy closest = null;
         int minDist = Integer.MAX_VALUE;
 
         for (Enemy enemy : enemies) {
-            int enemyPos = enemy.getBlockIndex();
-            int rawDist = enemyPos - playerPos;
-
-            // ✅ 방향성 + 사거리 + 가장 가까운 적
-            if ((rawDist * direction > 0) && Math.abs(rawDist) <= range && Math.abs(rawDist) < minDist) {
-                closest = enemy;
-                minDist = Math.abs(rawDist);
+            if (enemy.isDead()) continue;
+            int dist = enemy.getBlockIndex() - playerPos;
+            if ((direction == 1 && dist > 0 && dist <= range) ||
+                    (direction == -1 && dist < 0 && -dist <= range)) {
+                if (Math.abs(dist) < minDist) {
+                    closest = enemy;
+                    minDist = Math.abs(dist);
+                }
             }
         }
 
-        // 💥 공격 이펙트 위치용 블럭
+        // 이펙트 위치용 블럭
         Rect targetBlockRect = null;
 
         if (closest != null) {
-            // 적이 있으면 → 공격 및 이펙트
-            closest.takeDamage(dmg);
+            // ✅ 타겟을 포함한 AttackCommand 생성 후 실행
+            AttackCommand actualCmd = new AttackCommand(type, this, closest, cmd.isBonus);
+            actualCmd.execute();
+
+            // 이펙트 위치 계산용
             targetBlockRect = blockRectProvider.getBlockRect(closest.getBlockIndex());
         } else {
-            // 적이 없으면 → 앞 칸에 이펙트만 출력
             int frontBlockIndex = playerPos + direction;
             if (frontBlockIndex >= 0 && frontBlockIndex < blockCount) {
                 targetBlockRect = blockRectProvider.getBlockRect(frontBlockIndex);
-                if (targetBlockRect == null) {
-                    lastAttackEffectEndTime = System.currentTimeMillis() + ATTACK_EFFECT_INTERVAL;
-                    return; // 앞칸도 비어있으면 아무것도 안함
-                }
-            } else {
-                lastAttackEffectEndTime = System.currentTimeMillis() + ATTACK_EFFECT_INTERVAL;
-                return; // 범위 밖
             }
         }
 
-        // 💥 이펙트 생성
-        Bitmap[] frames = type.effectFrames;
-        boolean faceRight = type.effectFacesRight;
-        boolean enlarged = (type == AttackType.POWER);
-        int offsetY = type.offsetY;
+        // 이펙트 출력
+        if (targetBlockRect != null) {
+            Bitmap[] frames = type.effectFrames;
+            boolean faceRight = type.effectFacesRight;
+            int offsetY = type.offsetY;
+            float scale = type.effectScale;
 
-        int centerX = targetBlockRect.centerX();
-        int centerY = targetBlockRect.centerY();
-        int tileSize = targetBlockRect.width();
+            int x = targetBlockRect.centerX() - type.effectFrames[0].getWidth() / 2;
+            int y = targetBlockRect.centerY() - type.effectFrames[0].getHeight() / 2 + offsetY;
 
-        int x = centerX - tileSize / 2 + tileSize / 4; // ← 오른쪽으로 1/3 이동
-        int y = centerY - tileSize / 2 + offsetY;
+            EffectManager.getInstance().addEffect(
+                    new AttackEffect(frames, x, y, faceRight, scale)
+            );
+        }
 
-        float scale = type.effectScale;
-        AttackEffect effect = new AttackEffect(frames, x, y, faceRight, scale);
-        EffectManager.getInstance().addEffect(effect);
-
+        // 다음 공격 대기 시간 설정
         lastAttackEffectEndTime = System.currentTimeMillis() + ATTACK_EFFECT_INTERVAL;
     }
+
 
 
 

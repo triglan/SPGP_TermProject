@@ -31,14 +31,15 @@ public class Block {
 
     public void draw(Canvas canvas, Paint paint) {
         if (willBeAttacked) {
-            paint.setColor(Color.RED);
-        } else if (hasEnemy) {
-            paint.setColor(Color.BLUE);
+            paint.setColor(Color.YELLOW);
         } else if (hasPlayer) {
             paint.setColor(Color.GREEN);
+        } else if (hasEnemy) {
+            paint.setColor(Color.BLUE);
         } else {
             paint.setColor(Color.GRAY);
         }
+
 
         canvas.drawRect(rect, paint);
 

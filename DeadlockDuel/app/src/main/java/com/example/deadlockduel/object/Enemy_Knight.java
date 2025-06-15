@@ -1,6 +1,10 @@
 package com.example.deadlockduel.object;
 
 import android.content.res.Resources;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.util.Log;
 
 import java.util.List;
@@ -8,8 +12,10 @@ import java.util.List;
 import com.example.deadlockduel.R;
 import com.example.deadlockduel.framework.battle.AttackCommand;
 import com.example.deadlockduel.framework.battle.AttackType;
+import com.example.deadlockduel.framework.battle.EnemyAttackCommand;
 
 public class Enemy_Knight extends Enemy {
+    int alertLevel = 0;
     public Enemy_Knight(Resources res, int blockIndex, boolean faceRight) {
         super();
         this.blockIndex = blockIndex;
@@ -33,33 +39,66 @@ public class Enemy_Knight extends Enemy {
         int playerIndex = player.getBlockIndex();
         int dist = playerIndex - this.blockIndex;
 
+        // 1. 방향 회전
         if ((dist < 0 && direction != -1) || (dist > 0 && direction != 1)) {
-            Log.d("Enemy_Knight", "회전!");
-            rotate();
+            this.direction = (dist < 0) ? -1 : 1;
             return;
         }
 
+        int frontIndex = this.blockIndex + direction;
+
+        // 5. 느낌표 3개 → 플레이어가 여전히 정면 → 공격
+        if (alertLevel == 2 && playerIndex == frontIndex) {
+            attackQueue.add(new EnemyAttackCommand(AttackType.POWER, this, player));
+            alertLevel = 0;
+            return;
+        }
+
+        // 4. 이미 느낌표 1개 상태 → 정면 유지 중이면 3개로 승격
+        if (alertLevel == 1 && playerIndex == frontIndex) {
+            alertLevel = 2;
+            return;
+        }
+
+        // 3. 플레이어 정면에 있으면 느낌표 1개 띄움
+        if (playerIndex == frontIndex) {
+            alertLevel = 1;
+            return;
+        }
+
+        // 2. 정면까지 최대 1칸 이동 (중간 적 피하기)
+        int nextIndex = this.blockIndex + direction;
+
         boolean blocked = false;
-        int start = Math.min(playerIndex, blockIndex) + 1;
-        int end = Math.max(playerIndex, blockIndex);
         for (Enemy e : enemies) {
-            if (e == this || e.isDead()) continue;
-            int idx = e.getBlockIndex();
-            if (idx >= start && idx < end) {
-                Log.d("Enemy_Knight", "정지!");
+            if (e != this && !e.isDead() && e.getBlockIndex() == nextIndex) {
                 blocked = true;
                 break;
             }
         }
-        if (blocked) return;
+        if (!blocked && nextIndex != playerIndex) {
+            this.blockIndex = nextIndex;
+        }
 
-        if (Math.abs(dist) == 1) {
-            Log.d("Enemy_Knight", "근접 공격!");
-            attackQueue.add(new AttackCommand(AttackType.MELEE, player, false));
-        } else if (dist > 1) {
-            moveRight();
-        } else if (dist < -1) {
-            moveLeft();
+        alertLevel = 0;  // 위치 바뀌면 대기 상태 리셋
+    }
+
+    @Override
+    public void draw(Canvas canvas) {
+        super.draw(canvas);
+
+        if (!isDead() && alertLevel > 0) {
+            Rect body = getCurrentDrawRect();
+
+            Paint paint = new Paint();
+            paint.setColor(Color.RED);
+            paint.setTextSize(48);
+            paint.setFakeBoldText(true);
+            paint.setTextAlign(Paint.Align.CENTER);
+
+            String alertText = (alertLevel == 1) ? "!" : "!!!";
+            canvas.drawText(alertText, body.centerX(), body.top - 20, paint);
         }
     }
+
 }

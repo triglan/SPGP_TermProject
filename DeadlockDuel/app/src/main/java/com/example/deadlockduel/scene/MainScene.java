@@ -10,6 +10,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.deadlockduel.R;
@@ -49,6 +51,8 @@ public class MainScene implements Scene, BlockRectProvider {
     private final long TURN_ANIM_DURATION = 1000; // milliseconds
     private boolean turnAnimActive = false;
     private final Context context;
+    private Button retryButton;
+    private boolean isGameOver = false;
 
     public MainScene(Resources res, int screenWidth, int screenHeight, StageManager stageManager, Context context) {
         this.res = res;
@@ -69,7 +73,14 @@ public class MainScene implements Scene, BlockRectProvider {
         effectManager = EffectManager.getInstance();
         inputHandler = new TouchInputHandler(this);
         objectManager.getPlayer().setBlockRectProvider(this);
+        AttackCommand.blockRectProvider = this;
     }
+
+    @Override
+    public Block[] getAllBlocks() {
+        return objectManager.getBlocks();
+    }
+
 
     private void initEffects() {
         AttackType.MELEE.effectFrames = new Bitmap[] {
@@ -121,23 +132,12 @@ public class MainScene implements Scene, BlockRectProvider {
     }
 
     public void executeEnemyAttacks() {
-        List<AttackEffect> effects = new ArrayList<>();
-
         for (AttackCommand cmd : attackQueue) {
-            cmd.execute(
-                    objectManager.getEnemies().toArray(new Enemy[0]),
-                    effects,
-                    objectManager.getPlayer(),
-                    objectManager.getBlocks()
-            );
+            cmd.execute();  // ✅ 인자 없이 호출
         }
-
-        for (AttackEffect effect : effects) {
-            EffectManager.getInstance().addEffect(effect);
-        }
-
         attackQueue.clear();
     }
+
 
 
     public void handlePlayerExecuteAttack() {
