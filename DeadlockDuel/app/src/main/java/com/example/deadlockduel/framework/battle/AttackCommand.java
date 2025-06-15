@@ -12,12 +12,16 @@ public class AttackCommand {
     public final AttackType type;
     public final Player player;
     public final boolean perfectTiming;
-
+    public final int weaponIndex;
+    public final boolean isBonus;
 
     public AttackCommand(AttackType type, Player player, boolean perfectTiming) {
         this.type = type;
         this.player = player;
         this.perfectTiming = perfectTiming;
+
+        this.weaponIndex = -1;
+        this.isBonus = perfectTiming;
     }
 
     public void execute(Enemy[] enemies, List<AttackEffect> effects, Player player, Block[] blocks) {

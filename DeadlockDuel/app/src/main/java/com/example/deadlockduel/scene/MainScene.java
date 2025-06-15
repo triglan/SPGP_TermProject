@@ -1,5 +1,7 @@
 package com.example.deadlockduel.scene;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -8,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.view.MotionEvent;
+import android.widget.TextView;
 
 import com.example.deadlockduel.R;
 import com.example.deadlockduel.framework.battle.AttackCommand;
@@ -44,13 +47,15 @@ public class MainScene implements Scene {
     private long turnAnimStartTime = -1;
     private final long TURN_ANIM_DURATION = 1000; // milliseconds
     private boolean turnAnimActive = false;
+    private final Context context;
 
-    public MainScene(Resources res, int screenWidth, int screenHeight, StageManager stageManager) {
+    public MainScene(Resources res, int screenWidth, int screenHeight, StageManager stageManager, Context context) {
         this.res = res;
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
         this.stageManager = stageManager;
         this.config = stageManager.getCurrentStage();
+        this.context = context;
 
         initStage();
         initEffects();
@@ -98,6 +103,21 @@ public class MainScene implements Scene {
             initEffects(); // 이펙트도 초기화 필요할 경우
         }
     }
+    private void handleAttackButton(int weaponIndex) {
+        long now = System.currentTimeMillis();
+        boolean success = objectManager.getPlayer().tryAddAttack(weaponIndex, now);
+        if (!success) {
+            // TODO: 아이콘 흔들림 등 시각효과 추가 가능
+        } else {
+            // TODO: 공격 아이콘 머리 위에 띄우기 등 가능
+        }
+    }
+
+    private void handleExecuteAttack() {
+        Player player = objectManager.getPlayer();
+        List<Enemy> enemies = objectManager.getEnemies();
+        player.executeAttackQueue(enemies);
+    }
 
     public void update() {
         for (Block block : objectManager.getBlocks()) block.reset();
@@ -143,11 +163,22 @@ public class MainScene implements Scene {
     }
 
 
+    // 플레이어가 공격 실행 버튼을 눌렀을 때 호출됨
+    public void handlePlayerExecuteAttack() {
+        objectManager.getPlayer().executeAttackQueue(objectManager.getEnemies());
+        updateCooldownUI();
+    }
+    public void updateCooldownUI() {
+        int[] cd = objectManager.getPlayer().getWeaponCooldowns();
+        int[] max = objectManager.getPlayer().getMaxCooldowns();
+
+        ((TextView) ((Activity) context).findViewById(R.id.textCooldown1)).setText(cd[0] + "/" + max[0]);
+        ((TextView) ((Activity) context).findViewById(R.id.textCooldown2)).setText(cd[1] + "/" + max[1]);
+        ((TextView) ((Activity) context).findViewById(R.id.textCooldown3)).setText(cd[2] + "/" + max[2]);
+    }
 
     public void executeAllAttacks() {
-        while (!attackQueue.isEmpty()) {
-            executeNextAttack();
-        }
+        objectManager.getPlayer().executeAttackQueue(objectManager.getEnemies());
     }
     public void handlePlayerMoveLeft() {
         objectManager.getPlayer().moveLeft();
@@ -165,9 +196,10 @@ public class MainScene implements Scene {
     }
 
     public void handlePlayerAttack(AttackType type) {
-        performAttack(type);          // 공격 실행은 MainScene에서 계속 처리
-        turnProcessor.advanceTurn(); // 턴 처리 및 적 행동은 위임
+        objectManager.getPlayer().tryAddAttack(type.ordinal(), System.currentTimeMillis());
+        turnProcessor.advanceTurn();
     }
+
     public void incrementTurnCount() {
         turnCount++;
         turnAnimStartTime = System.currentTimeMillis();

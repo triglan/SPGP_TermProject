@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -15,6 +16,8 @@ import com.example.deadlockduel.object.Player;
 import com.example.deadlockduel.scene.MainScene;
 
 public class DeadlockDuelActivity extends AppCompatActivity {
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +34,8 @@ public class DeadlockDuelActivity extends AppCompatActivity {
                 getResources(),
                 getWindowManager().getDefaultDisplay().getWidth(),
                 getWindowManager().getDefaultDisplay().getHeight(),
-                stageManager
+                stageManager,
+                DeadlockDuelActivity.this
         );
         gameView.setInitialScene(mainScene);
 
@@ -44,17 +48,16 @@ public class DeadlockDuelActivity extends AppCompatActivity {
         ImageButton btnAttack2 = findViewById(R.id.btnAttack2);
         ImageButton btnAttack3 = findViewById(R.id.btnAttack3);
 
-//        btnLeft.setOnClickListener(v -> player.moveLeft());
-//        btnRight.setOnClickListener(v -> player.moveRight());
-//        btnRotate.setOnClickListener(v -> player.rotate());
-        btnLeft.setOnClickListener(v -> mainScene.handlePlayerMoveLeft());     // ✅ 변경
-        btnRight.setOnClickListener(v -> mainScene.handlePlayerMoveRight());   // ✅ 변경
-        btnRotate.setOnClickListener(v -> mainScene.handlePlayerRotate());     // ✅ 변경
+        btnLeft.setOnClickListener(v -> mainScene.handlePlayerMoveLeft());
+        btnRight.setOnClickListener(v -> mainScene.handlePlayerMoveRight());
+        btnRotate.setOnClickListener(v -> mainScene.handlePlayerRotate());
 
         btnAttack1.setOnClickListener(v -> mainScene.handlePlayerAttack(AttackType.BASIC));
         btnAttack2.setOnClickListener(v -> mainScene.handlePlayerAttack(AttackType.LONG_RANGE));
         btnAttack3.setOnClickListener(v -> mainScene.handlePlayerAttack(AttackType.POWER));
 
-        Log.d("DeadlockDuelActivity", "MainScene initialized");
+        Button btnAttackExecute = findViewById(R.id.btnAttackExecute);
+        btnAttackExecute.setOnClickListener(v -> mainScene.handlePlayerExecuteAttack());
+
     }
 }

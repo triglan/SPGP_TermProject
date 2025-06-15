@@ -63,6 +63,9 @@ public abstract class Enemy {
         hitFlashTimer = 18;
         hitShakeTimer = 18;
     }
+    public void takeDamage(int damage) {
+        hit(damage);
+    }
 
     public void updateBlockState(Block[] blocks) {
         if (blockIndex >= 0 && blockIndex < blocks.length) {
