@@ -55,7 +55,7 @@ public class Enemy_Knight extends Enemy {
 
         if (Math.abs(dist) == 1) {
             Log.d("Enemy_Knight", "근접 공격!");
-            attackQueue.add(new AttackCommand(AttackType.BASIC, player, false));
+            attackQueue.add(new AttackCommand(AttackType.MELEE, player, false));
         } else if (dist > 1) {
             moveRight();
         } else if (dist < -1) {

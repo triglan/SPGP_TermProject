@@ -70,14 +70,14 @@ public class MainScene implements Scene {
     }
 
     private void initEffects() {
-        AttackType.BASIC.effectFrames = new Bitmap[] {
+        AttackType.MELEE.effectFrames = new Bitmap[] {
                 BitmapFactory.decodeResource(res, R.drawable.attack_effect_melee_1),
                 BitmapFactory.decodeResource(res, R.drawable.attack_effect_melee_2),
                 BitmapFactory.decodeResource(res, R.drawable.attack_effect_melee_3),
                 BitmapFactory.decodeResource(res, R.drawable.attack_effect_melee_4)
         };
-        AttackType.BASIC.effectFacesRight = true;
-        AttackType.BASIC.offsetY = -40;
+        AttackType.MELEE.effectFacesRight = true;
+        AttackType.MELEE.offsetY = -40;
 
         AttackType.LONG_RANGE.effectFrames = new Bitmap[] {
                 BitmapFactory.decodeResource(res, R.drawable.attack_effect_range_1),

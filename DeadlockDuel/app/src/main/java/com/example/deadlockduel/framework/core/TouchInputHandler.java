@@ -1,6 +1,5 @@
 package com.example.deadlockduel.framework.core;
 
-import android.util.Log;
 import android.view.MotionEvent;
 
 import com.example.deadlockduel.framework.battle.AttackType;
@@ -25,7 +24,7 @@ public class TouchInputHandler {
         } else if (x < screenWidth * 2f / 3f) {
             scene.getPlayer().moveRight();  // 오른쪽으로 이동
         } else {
-            scene.handlePlayerAttack(AttackType.BASIC); // 공격
+            scene.handlePlayerAttack(AttackType.MELEE); // 공격
         }
 
 

@@ -16,7 +16,8 @@ import java.util.Set;
 
 import com.example.deadlockduel.framework.battle.AttackCommand;
 import com.example.deadlockduel.framework.battle.AttackType;
-import com.example.deadlockduel.object.Enemy;
+import com.example.deadlockduel.framework.data.WeaponDatabase;
+import com.example.deadlockduel.framework.data.WeaponInfo;
 
 import com.example.deadlockduel.R;
 
@@ -35,9 +36,13 @@ public class Player {
 
     // 공격 큐 및 무기 쿨타임 관련 필드
     private final List<AttackCommand> attackQueue = new ArrayList<>();
-    private final int[] weaponCooldowns = new int[] {3, 3, 3}; // 현재 쿨타임
+    private final int[] weaponCooldowns = new int[] {    // 현재 쿨타임
+            WeaponDatabase.get(AttackType.MELEE).maxCooldown,
+            WeaponDatabase.get(AttackType.LONG_RANGE).maxCooldown,
+            WeaponDatabase.get(AttackType.POWER).maxCooldown
+    };
     private final int[] maxCooldowns = new int[] {2, 3, 3}; // 무기별 최대 쿨타임
-    private final int[] weaponPower = new int[] {3, 1, 2};
+    private final int[] weaponPower = new int[] {4, 2, 3};
 
     // 타이밍 보너스 판별 위한 이전 입력 시간 저장
     private long lastAttackTime = 0;
@@ -73,28 +78,32 @@ public class Player {
     // 공격 실행 (적 리스트 입력 필요)
     public void executeAttackQueue(List<Enemy> enemies) {
         for (AttackCommand cmd : attackQueue) {
-            int range = getWeaponRange(cmd.type.ordinal());
-            int dmg = weaponPower[cmd.type.ordinal()] + (cmd.perfectTiming ? 1 : 0);
+            // 🧩 무기 타입에 따른 사거리와 데미지 설정
+            WeaponInfo info = WeaponDatabase.get(cmd.type);
+            int dmg = info.baseDamage + (cmd.isBonus ? 1 : 0);
+            int range = info.range;
+
+            if (cmd.isBonus) dmg += 1;
+
             int playerPos = this.blockIndex;
+            Enemy closest = null;
+            int minDist = Integer.MAX_VALUE;
+
             for (Enemy enemy : enemies) {
                 int dist = Math.abs(enemy.getBlockIndex() - playerPos);
-                if (dist <= range) {
-                    enemy.takeDamage(dmg);
-                    break;
+                if (dist <= range && dist < minDist) {
+                    closest = enemy;
+                    minDist = dist;
                 }
             }
+
+            if (closest != null) {
+                closest.takeDamage(dmg);
+            }
         }
+
         attackQueue.clear();
     }
-    private int getWeaponRange(int idx) {
-        switch (idx) {
-            case 0: return 1;
-            case 1: return 999;
-            case 2: return 2;
-            default: return 0;
-        }
-    }
-
 
     //  턴 경과 시 쿨타임 증가
     public void onTurnPassed() {
@@ -117,7 +126,14 @@ public class Player {
 
     // 쿨타임 확인용 getter
     public int[] getWeaponCooldowns() { return weaponCooldowns; }
-    public int[] getMaxCooldowns() { return maxCooldowns; }
+    public int[] getMaxCooldowns() {
+        return new int[] {
+                WeaponDatabase.get(AttackType.MELEE).maxCooldown,
+                WeaponDatabase.get(AttackType.LONG_RANGE).maxCooldown,
+                WeaponDatabase.get(AttackType.POWER).maxCooldown
+        };
+    }
+
 
 
     public void setBlockCount(int count) {

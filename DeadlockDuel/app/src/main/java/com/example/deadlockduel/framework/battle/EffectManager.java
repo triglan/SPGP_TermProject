@@ -8,8 +8,13 @@ import java.util.Iterator;
 import java.util.List;
 
 public class EffectManager {
+    private static final EffectManager instance = new EffectManager();
+    public static EffectManager getInstance() { return instance; }
+
     private final List<AttackEffect> effects = new ArrayList<>();
     private final Paint paint = new Paint();
+
+    private EffectManager() {}
 
     public void addEffect(AttackEffect effect) {
         effects.add(effect);

@@ -1,10 +1,8 @@
 package com.example.deadlockduel.app;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -52,7 +50,7 @@ public class DeadlockDuelActivity extends AppCompatActivity {
         btnRight.setOnClickListener(v -> mainScene.handlePlayerMoveRight());
         btnRotate.setOnClickListener(v -> mainScene.handlePlayerRotate());
 
-        btnAttack1.setOnClickListener(v -> mainScene.handlePlayerAttack(AttackType.BASIC));
+        btnAttack1.setOnClickListener(v -> mainScene.handlePlayerAttack(AttackType.MELEE));
         btnAttack2.setOnClickListener(v -> mainScene.handlePlayerAttack(AttackType.LONG_RANGE));
         btnAttack3.setOnClickListener(v -> mainScene.handlePlayerAttack(AttackType.POWER));
 
